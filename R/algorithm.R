@@ -234,25 +234,28 @@ addCausalLinks <- function(D, CDB, SNOMED){
 
 removeAncestorsD <- function(D, CDB, SNOMED){
 	# Remove concepts that are ancestors of another concept
+	root_types <- c('finding', 'disorder')
 	C <- attr(D, 'annotations')
-	root_types <- c('finding', 'disorder', 'morphologic abnormality')
-	matchIds <- as.SNOMEDconcept(unique(
-		C[semType %in% root_types]$conceptId))
-	matchIds <- remove_ancestors(matchIds)
-	C[semType %in% root_types & !(conceptId %in% matchIds),
-		semType := paste0('excl_a_', semType)]
-	setattr(D, 'annotations', C)
+	if (nrow(C) > 0){
+		matchIds <- as.SNOMEDconcept(unique(
+			C[semType %in% root_types]$conceptId))
+		matchIds <- remove_ancestors(matchIds)
+		C[semType %in% root_types & !(conceptId %in% matchIds),
+			semType := paste0('excl_a_', semType)]
+		setattr(D, 'annotations', C)
+	}
 	D
 }
 
 removeSingleWordOverlappedFindingsD <- function(D, CDB, SNOMED){
 	# Remove single word findings that are overlapped by longer
 	# concepts (which are more likely to be correct)
+	root_types <- c('finding', 'disorder')
 	C <- attr(D, 'annotations')
 	multiword_rows <- C$endwhole > C$startwhole &
-		C$semType %in% c('finding', 'disorder')
+		C$semType %in% root_types
 	singleword_rows <- C$endwhole == C$startwhole &
-		C$semType %in% c('finding', 'disorder')
+		C$semType %in% root_types
 	if (sum(multiword_rows) > 0 & sum(singleword_rows) > 0){
 		multiword_pos <- unique(unlist(lapply(which(multiword_rows),
 			function(i){C[i]$startwhole:C[i]$endwhole})))

@@ -48,6 +48,7 @@ showparse <- function(x, min_len_normalize = 5){
 #'   characters will not be lemmatised
 #' @return CDB environment with lemma columns added to relevant tables
 #' @seealso 
+#' @export
 #' @references 
 #' @examples
 addLemmaToCDB <- function(CDB, tablenames = c('FINDINGS', 
@@ -83,15 +84,14 @@ addLemmaToCDB <- function(CDB, tablenames = c('FINDINGS',
 #' @seealso 
 #' @references 
 #' @examples
-findConceptMatch <- function(text, lemma = NULL, CDB, SNOMED){
+findConceptMatch <- function(text, lemma = text, CDB, SNOMED){
 	# A simple NER matching protocol = seeks a SNOMED CT match for
 	# a text. The text needs to be preceded and followed by spaces
 	# and must be lower case.
 	if (is.null(lemma)){
-		thelemma <- paste0(' ', paste(text, collapse = ' '), ' ')
-	} else {
-		thelemma <- paste0(' ', paste(lemma, collapse = ' '), ' ')
+		stop('Lemmas must be added to CDB using addLemmaToCDB')
 	}
+	thelemma <- paste0(' ', paste(lemma, collapse = ' '), ' ')
 	text <- c(paste0(' ', paste(text, collapse = ' '), ' '),
 		paste0(' ', paste(tolower(text), collapse = ' '), ' '))
 	# Return a vector of matched concepts
@@ -149,7 +149,7 @@ parseSentence <- function(text, CDB, SNOMED, wordlimit = 6,
 		semType = character(0), due_to = list(zeroconcept),
 		causing = list(zeroconcept),
 		attributes = list(zeroconcept), link_to = integer(0),
-		laterality = zeroconcept)
+		laterality = zeroconcept, term = character(0))
 	# Linking by token and lemma
 	# Search for matches up to (wordlimit) words
 	i = 1
