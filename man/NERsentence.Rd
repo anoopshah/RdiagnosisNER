@@ -2,36 +2,111 @@
 % Please edit documentation in R/NER.R
 \name{NERsentence}
 \alias{NERsentence}
-\title{WORK IN PROGRESS}
+\alias{NERdocument}
+\alias{NERcorpus}
+\title{Analyse a sentence, document or corpus}
 \usage{
 NERsentence(text, CDB, SNOMED, noisy = TRUE)
+
+NERdocument(text, CDB, SNOMED)
+
+NERcorpus(texts, ids = seq_along(texts), CDB, SNOMED)
 }
 \arguments{
+\item{text}{a single text to analyse}
+
+\item{CDB}{environment containing a concept database, to which
+the composition lookup has been added using addComposeLookupToCDB
+and terms have been lemmatized using addLemmaToCDB}
+
 \item{SNOMED}{environment containing a SNOMED dictionary}
 
-\item{WN}{WordNet data.table as returned by downloadWordnet
-containing WordNet data from appropriate
-categories, in the format: cat (character), wordnetId (integer64),
-synonyms (list), parents (list), adj (list)}
+\item{noisy}{TRUE or FALSE, whether to display intermediate results}
 
-\item{MANUAL_SYNONYMS}{}
+\item{texts}{a character vector of texts to analyse}
+
+\item{ids}{vector of IDs for texts to analyse}
 }
 \value{
-environment containing the following data tables: FINDINGS,
-  QUAL, CAUSES, BODY, FINDINGS, OTHERSUB, OVERLAP
+NERsentence and NERdocument returns a data.table containing
+  spacy parse variables: token (the token itself), lemma (spacy
+  lemmatized version of token), dep_rel (dependency relation),
+  head_token_id (token ID of dependency link), semType (semantic
+  type if mapped to a SNOMED CT concept), token_id. In the case of
+  NERdocument, there is an additional column named 'sentence
+  containing the sentence number. There is an attribute
+  'annotations' which is a data.table containing the annotated
+  SNOMED CT concepts, and an attribute 'findings' which is a
+  data.table with columns conceptId and term, containing the
+  set of distinct finding or disorder concepts extracted. 
+  NERcorpus returns a data.table with columns id (text document
+  identifier), conceptId and term.
 }
 \description{
-Extracts SNOMED CT concepts from appropriate places in the 
-hierarchy to create a set of CDB files in an environment.
-Uses WordNet and manual synonyms if available.
+Extract SNOMED CT concepts from the text, using the composition
+method to find the correct, specific SNOMED code.
+These functions do not apply any disambiguation or context detection.
 }
 \examples{
-# Not run
-# WORDNET <- downloadWordnet()
-}
-\references{
-\url{https://wordnet.princeton.edu/}
+data.table::setDTthreads(threads = 1)
+
+# Create a mini CDB based on the sample SNOMED dictionary
+miniSNOMED <- sampleSNOMED()
+miniCDB <- createCDB(SNOMED = miniSNOMED)
+
+# 83291003 | Cor pulmonale (disorder) 
+# 19829001 | Disorder of lung (disorder)
+# Decompose 2 concepts and add the decomposition lookup to CDB
+DEC <- decompose(SNOMEDconcept(c('83291003', '19829001'),
+  SNOMED = miniSNOMED), CDB = miniCDB, SNOMED = miniSNOMED)
+miniCDB <- addComposeLookupToCDB(DEC, CDB = miniCDB)
+miniCDB <- addLemmaToCDB(miniCDB)
+
+# NER on a simple sentence
+NERsentence('Cardiomyopathy', CDB = miniCDB, SNOMED = miniSNOMED)
+
+# Parsed text:
+#             token          lemma dep_rel head_token_id  semType
+#            <char>         <char>  <char>         <num>   <char>
+# 1: Cardiomyopathy Cardiomyopathy    ROOT             1 disorder
+# 
+# Before refinement:
+#          conceptId startword endword startwhole endwhole  semType due_to
+#    <SNOMEDconcept>     <num>   <num>      <num>    <num>   <char> <list>
+# 1:        85898001         1       1          1        1 disorder [NULL]
+#    causing attributes link_to      laterality                      term
+#     <list>     <list>   <int> <SNOMEDconcept>                    <char>
+# 1:  [NULL]     [NULL]      NA            <NA> Cardiomyopathy (disorder)
+# 
+# After refinement:
+#          conceptId                      term  words
+#    <SNOMEDconcept>                    <char> <char>
+# 1:        85898001 Cardiomyopathy (disorder)    1-1
+# 
+# Remove ancestors of other concepts and
+# single word overlapped concepts in final output:
+#          conceptId                      term  words
+#    <SNOMEDconcept>                    <char> <char>
+# 1:        85898001 Cardiomyopathy (disorder)    1-1
+#          conceptId                      term
+#    <SNOMEDconcept>                    <char>
+# 1:        85898001 Cardiomyopathy (disorder)
+# 
+# Test NER sentence with SNOMED concept composition
+attr(NERsentence('Right heart failure caused by lung disease',
+  CDB = miniCDB, SNOMED = miniSNOMED, noisy = FALSE), 'findings')
+
+# Test NER document
+attr(NERdocument('Cardiomyopathy. 
+  Right heart failure caused by lung disease',
+  CDB = miniCDB, SNOMED = miniSNOMED), 'findings')
+ 
+# Test NER corpus
+NERcorpus(c('No concepts here', 'Cardiomyopathy. 
+  Right heart failure caused by lung disease'), 1:2,
+  CDB = miniCDB, SNOMED = miniSNOMED)
+
 }
 \seealso{
-[addWordnet()]
+addLemmaToCDB
 }

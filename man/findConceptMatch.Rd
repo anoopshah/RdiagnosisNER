@@ -4,7 +4,7 @@
 \alias{findConceptMatch}
 \title{Find SNOMED CT concepts matching a portion of text}
 \usage{
-findConceptMatch(text, lemma = NULL, CDB, SNOMED)
+findConceptMatch(text, lemma = text, CDB, SNOMED)
 }
 \arguments{
 \item{text}{text phrase to match}

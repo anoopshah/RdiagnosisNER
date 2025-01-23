@@ -247,7 +247,7 @@ removeAncestorsD <- function(D, CDB, SNOMED){
 	D
 }
 
-removeSingleWordOverlappedFindingsD <- function(D, CDB, SNOMED){
+removeSingleWordOverlappedFindingsD <- function(D){
 	# Remove single word findings that are overlapped by longer
 	# concepts (which are more likely to be correct)
 	root_types <- c('finding', 'disorder')
@@ -266,17 +266,17 @@ removeSingleWordOverlappedFindingsD <- function(D, CDB, SNOMED){
 	D
 }
 
-remove_ancestors <- function(conceptIds){
+remove_ancestors <- function(conceptIds, CDB, SNOMED = getSNOMED()){
 	# Remove concepts that are ancestors of another concept from
 	# a vector of concepts
-	conceptIds <- as.SNOMEDconcept(conceptIds)
-	if (length(conceptIds) == 0){
+	conceptIds <- as.SNOMEDconcept(conceptIds, SNOMED = SNOMED)
+	if (length(conceptIds) > 0){
 		# Remove all matches which are an ancestor of another match
 		i <- 1
 		while (i <= length(conceptIds)){
 			ancIds <- ancestors(conceptIds[i], SNOMED = SNOMED,
 				TRANSITIVE = CDB$TRANSITIVE, include_self = FALSE)
-			if (length(intersect(matchIds, ancIds)) > 0){
+			if (length(intersect(conceptIds, ancIds)) > 0){
 				conceptIds <- setdiff(conceptIds, ancIds)
 				i <- 1
 			} else {
