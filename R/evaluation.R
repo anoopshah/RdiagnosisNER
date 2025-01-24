@@ -24,8 +24,6 @@
 #'   aggregated across all documents before calculating precision,
 #'   recall and F1. FALSE returns results per document
 #' @param SNOMED environment containing a SNOMED dictionary
-#' @param CDB environment containing a concept database and transitive
-#'   table
 #' @param subset SNOMEDconcept vector specifying which concepts
 #'   to include in this evaluation (e.g. only disorders)
 #' @return data.table with columns precision, recall, F1, and also
@@ -59,18 +57,25 @@
 #' evaluateNER(actual, goldstandard, relaxed = TRUE)
 #' evaluateNER(actual, goldstandard, aggregate = FALSE)
 evaluateNER <- function(actual, goldstandard, relaxed = FALSE,
-	aggregate = TRUE, CDB = CDB, SNOMED = Rdiagnosislist::getSNOMED(),
+	aggregate = TRUE, SNOMED = Rdiagnosislist::getSNOMED(),
 	subset = NULL){
+		
+	# Prepare actual annotations for evaluation
 	A <- as.data.table(copy(actual))
 	if (!(all(c('id', 'conceptId') %in% names(A)))){
 		stop('actual must contain columns id and conceptId')
 	}
-	A <- A[!duplicated(A)]
+	if (!is.null(subset)){
+		subset <- as.SNOMEDconcept(subset, SNOMED = SNOMED)
+	}
 	if (!is.null(subset)){
 		A <- A[conceptId %in% subset]
 	}
-	A <- A[, list(conceptId = remove_ancestors(conceptId,
-		SNOMED = SNOMED, CDB = CDB)), by = id]
+	A <- A[!duplicated(A)][, list(
+		conceptId = remove_ancestors(conceptId,
+			SNOMED = SNOMED)), by = id]
+	
+	# Prepare gold standard for recall
 	G_recall <- as.data.table(copy(goldstandard))
 	if (!(all(c('id', 'conceptId') %in% names(G_recall)))){
 		stop('goldstandard must contain columns id and conceptId')
@@ -90,10 +95,12 @@ evaluateNER <- function(actual, goldstandard, relaxed = FALSE,
 	}
 	# G_recall is a table of id with each linked concept separately
 	ids <- unique(G_recall$id)
+	
+	# Prepare gold standard for precision
 	G_precision <- data.table(id = ids, valid_conceptId = lapply(ids,
 		function(x){ remove_ancestors(
 			as.SNOMEDconcept(unlist(sapply(G_recall[id == x]$conceptId,
-			as.character)), SNOMED = SNOMED), SNOMED = SNOMED, CDB = CDB)
+			as.character)), SNOMED = SNOMED), SNOMED = SNOMED)
 		}))
 	# G_precision is a table of id with all linked concepts
 	# Remove unnecessary concepts from G_recall
@@ -112,13 +119,11 @@ evaluateNER <- function(actual, goldstandard, relaxed = FALSE,
 			if (relaxed){
 				G_recall[id == x, found := sapply(conceptId, function(i){
 					any(i %in% descendants(A[id == x]$conceptId,
-						SNOMED = SNOMED, TRANSITIVE = CDB$TRANSITIVE,
-						include_self = TRUE))
+						SNOMED = SNOMED, include_self = TRUE))
 				})]
 				A[id == x, linked := conceptId %in%
-					ancestors(G_precision[id == x]$valid_conceptId,
-					SNOMED = SNOMED, TRANSITIVE = CDB$TRANSITIVE,
-					include_self = TRUE)]
+					ancestors(G_precision[id == x]$valid_conceptId[[1]],
+					SNOMED = SNOMED, include_self = TRUE)]
 			} else {
 				G_recall[id == x, found := sapply(conceptId, function(i){
 					any(i %in% A[id == x]$conceptId)

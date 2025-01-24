@@ -10,7 +10,6 @@ evaluateNER(
   goldstandard,
   relaxed = FALSE,
   aggregate = TRUE,
-  CDB = CDB,
   SNOMED = Rdiagnosislist::getSNOMED(),
   subset = NULL
 )
@@ -32,9 +31,6 @@ only exact concepts are counted}
 \item{aggregate}{Boolean TRUE or FALSE. TRUE means that all counts
 aggregated across all documents before calculating precision,
 recall and F1. FALSE returns results per document}
-
-\item{CDB}{environment containing a concept database and transitive
-table}
 
 \item{SNOMED}{environment containing a SNOMED dictionary}
 

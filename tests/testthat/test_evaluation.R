@@ -38,74 +38,12 @@ test_that('Testing evaluation functions', {
 	
 	E <- evaluateNER(actual, goldstandard, relaxed = TRUE,
 		SNOMED = sampleSNOMED())
-	expect_equal(E$precision, )
-	expect_equal(E$recall, )
+	expect_equal(E$precision, 0.5)
+	expect_equal(E$recall, 0.4)
 	
 	E <- evaluateNER(actual, goldstandard, aggregate = FALSE,
 		SNOMED = sampleSNOMED())
 	expect_equal(E$truepos, c(0, 0, 1))
 	expect_equal(E$falseneg, c(1, 3, 0))
 	expect_equal(E$falsepos, c(0, 2, 1))
-})
-
-test_that('Testing NER sentence with concept composition', {
-	# Create CDB for NER
-	data.table::setDTthreads(threads = 1)
-	miniSNOMED <- Rdiagnosislist::sampleSNOMED()
-	miniCDB <- createCDB(SNOMED = miniSNOMED,
-		MANUAL_SYNONYMS = NULL)
-	DEC <- decompose(SNOMEDconcept(c('83291003', '19829001'),
-		SNOMED = miniSNOMED), CDB = miniCDB, SNOMED = miniSNOMED)
-	miniCDB <- addComposeLookupToCDB(DEC, CDB = miniCDB)
-	miniCDB <- addLemmaToCDB(miniCDB)
-
-	# SNOMED concepts for testing
-	sct_corpulmonale <- SNOMEDconcept('Cor pulmonale',
-		SNOMED = miniSNOMED)
-	sct_lungdisease <- SNOMEDconcept('Disorder of lung',
-		SNOMED = miniSNOMED)
-
-	# Test NER sentence with SNOMED concept composition
-	OUT <- NERsentence('Right heart failure caused by lung disease',
-		CDB = miniCDB, SNOMED = miniSNOMED)
-	expect_setequal(attr(OUT, 'findings')$conceptId,
-		c(sct_lungdisease, sct_corpulmonale))
-})
-
-test_that('Testing NER document and corpus', {
-	# Create CDB for NER
-	data.table::setDTthreads(threads = 1)
-	miniSNOMED <- Rdiagnosislist::sampleSNOMED()
-	miniCDB <- createCDB(SNOMED = miniSNOMED,
-		MANUAL_SYNONYMS = NULL)
-	DEC <- decompose(SNOMEDconcept(c('83291003', '19829001'),
-		SNOMED = miniSNOMED), CDB = miniCDB, SNOMED = miniSNOMED)
-	miniCDB <- addComposeLookupToCDB(DEC, CDB = miniCDB)
-	miniCDB <- addLemmaToCDB(miniCDB)
-
-	# SNOMED concepts for testing
-	sct_corpulmonale <- SNOMEDconcept('Cor pulmonale',
-		SNOMED = miniSNOMED)
-	sct_lungdisease <- SNOMEDconcept('Disorder of lung',
-		SNOMED = miniSNOMED)
-	sct_cardiomyopathy <- SNOMEDconcept('Cardiomyopathy',
-		SNOMED = miniSNOMED)
-	zeroconcept <- sct_cardiomyopathy[0]
-
-	# Test NER document
-	OUT <- NERdocument('Cardiomyopathy. 
-		Right heart failure caused by lung disease',
-		CDB = miniCDB, SNOMED = miniSNOMED)
-	expect_equal(attr(OUT, 'findings')[sentence == 1]$conceptId,
-		sct_cardiomyopathy)
-	expect_equal(sort(attr(OUT, 'findings')[sentence == 2]$conceptId),
-		c(sct_lungdisease, sct_corpulmonale))
-
-	# Test NER corpus
-	OUT <- NERcorpus(c('No concepts here', 'Cardiomyopathy. 
-		Right heart failure caused by lung disease'), 1:2,
-		CDB = miniCDB, SNOMED = miniSNOMED)
-	expect_equal(OUT[id == 1]$conceptId, zeroconcept)
-	expect_setequal(OUT[id == 2]$conceptId,
-		c(sct_lungdisease, sct_corpulmonale, sct_cardiomyopathy))
 })

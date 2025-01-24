@@ -239,7 +239,8 @@ removeAncestorsD <- function(D, CDB, SNOMED){
 	if (nrow(C) > 0){
 		matchIds <- as.SNOMEDconcept(unique(
 			C[semType %in% root_types]$conceptId))
-		matchIds <- remove_ancestors(matchIds)
+		matchIds <- remove_ancestors(matchIds, CDB = CDB, 
+			SNOMED = SNOMED)
 		C[semType %in% root_types & !(conceptId %in% matchIds),
 			semType := paste0('excl_a_', semType)]
 		setattr(D, 'annotations', C)
@@ -266,7 +267,8 @@ removeSingleWordOverlappedFindingsD <- function(D){
 	D
 }
 
-remove_ancestors <- function(conceptIds, CDB, SNOMED = getSNOMED()){
+remove_ancestors <- function(conceptIds, CDB = NULL,
+	SNOMED = getSNOMED()){
 	# Remove concepts that are ancestors of another concept from
 	# a vector of concepts
 	conceptIds <- as.SNOMEDconcept(conceptIds, SNOMED = SNOMED)
@@ -274,8 +276,13 @@ remove_ancestors <- function(conceptIds, CDB, SNOMED = getSNOMED()){
 		# Remove all matches which are an ancestor of another match
 		i <- 1
 		while (i <= length(conceptIds)){
-			ancIds <- ancestors(conceptIds[i], SNOMED = SNOMED,
-				TRANSITIVE = CDB$TRANSITIVE, include_self = FALSE)
+			if (!is.null(CDB)){
+				ancIds <- ancestors(conceptIds[i], SNOMED = SNOMED,
+					TRANSITIVE = CDB$TRANSITIVE, include_self = FALSE)
+			} else {
+				ancIds <- ancestors(conceptIds[i], SNOMED = SNOMED,
+					include_self = FALSE)
+			}
 			if (length(intersect(conceptIds, ancIds)) > 0){
 				conceptIds <- setdiff(conceptIds, ancIds)
 				i <- 1
