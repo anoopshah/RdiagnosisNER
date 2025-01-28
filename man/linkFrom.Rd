@@ -35,4 +35,13 @@ D <- showparse("ulcers of the left big and second toes due to diabetes")
 \seealso{
 addAnd, findAllergy, findAttr, findBody, findCause,
   findLaterality, linkFrom, linkTo
+
+Other linkFunction: 
+\code{\link{addAnd}()},
+\code{\link{findAllergy}()}
+
+Other linkFunction: 
+\code{\link{addAnd}()},
+\code{\link{findAllergy}()}
 }
+\concept{linkFunction}

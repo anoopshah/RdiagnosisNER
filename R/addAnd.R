@@ -12,7 +12,8 @@
 #'   vector if no link
 #' @seealso addAnd, findAllergy, findAttr, findBody, findCause,
 #'   findLaterality, linkFrom, linkTo
-#' @references 
+#' @family linkFunction
+#' @export
 #' @examples
 #' D <- showparse("fracture of left femur and right humerus")
 #' addAnd(D, 4)
@@ -21,6 +22,10 @@ addAnd <- function(D, i){
 	# D = spacy parse table containing columns: token, lemma, dep_rel,
 	#   head, semType 
 	# i = vector of indices of base word(s)
+	
+	# Declare column names for CRAN check
+	dep_rel <- NULL
+	
 	if (length(i) == 0){
 		return(integer(0))
 	} else if (length(i) > 1){

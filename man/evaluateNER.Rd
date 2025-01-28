@@ -52,15 +52,17 @@ results will be the same whether or not the diabetes mellitus concept
 is returned by the algorithm.
 }
 \examples{
+require(Rdiagnosislist)
+require(data.table)
 SNOMED <- sampleSNOMED()
 
 actual = data.table(id = c(2, 2, 3, 3, 3),
-  conceptId = as.SNOMEDconcept(
+  conceptId = as.SNOMEDconcept(c(
   'Diastolic heart failure', 
   'Systolic heart failure', 
   'Systolic dysfunction', 
   'Acute heart failure',
-  'Cardiac finding'))
+  'Cardiac finding')))
 # first two are correct, third concept is vaguer than gold standard
 # (i.e. true in 'relaxed' mode but not if relaxed = FALSE),
 # fourth concept is a false positive and fifth is an ancestor

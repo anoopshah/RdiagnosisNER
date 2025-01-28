@@ -1,6 +1,7 @@
 #### LATERALITY ####
 
 #' @rdname findAttr
+#' @family linkFunction
 #' @export
 findLaterality <- function(D, i){
 	# Arguments:

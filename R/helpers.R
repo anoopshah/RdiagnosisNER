@@ -15,15 +15,20 @@
 #'   dependency relates to)
 #' @import data.table
 #' @import bit64
-#' @import data.table
+#' @import spacyr
+#' @export
+#' @importFrom spacyr spacy_parse
 #' @import Rdiagnosislist
-#' @seealso 
-#' @references 
+#' @seealso parseSentence
+#' @export
 #' @examples
 #' D <- showparse("fracture of left femur and right humerus")
 #' D
-#' @export
 showparse <- function(x, min_len_normalize = 5){
+	
+	# Declare column names for CRAN check
+	token <- lemma <- dep_rel <- head_token_id <- NULL
+	
 	OUT <- as.data.table(spacy_parse(x, entity = TRUE,
 		remove_punct = TRUE, dependency = TRUE, lemma = TRUE,
 		pos = TRUE, output = 'data.frame'))[,
@@ -47,22 +52,31 @@ showparse <- function(x, min_len_normalize = 5){
 #' @param min_len_normalize tokenswith fewer than this number of
 #'   characters will not be lemmatised
 #' @return CDB environment with lemma columns added to relevant tables
-#' @seealso 
+#' @importFrom spacyr spacy_parse
+#' @importFrom data.table setindexv
+#' @seealso findConceptMatch
 #' @export
-#' @references 
 #' @examples
+#' # Not run
+#' # CDB <- addLemmaToCDB(CDB)
 addLemmaToCDB <- function(CDB, tablenames = c('FINDINGS', 
 	'QUAL', 'BODY', 'LATERALITY', 'SEVERITY', 'CAUSES', 'MORPH'),
 	ignore_if_already = TRUE, min_len_normalize = 5){
+		
+	# Declare column names for CRAN check
+	lemma <- term <- conceptId <- NULL
+	
+		
 	for (i in tablenames){
 		TABLE <- get(i, envir = CDB)
 		if ((!ignore_if_already) | (!('lemma' %in% names(TABLE)))){
 			message('Lemmatizing ', i)
 			TABLE[, lemma := ifelse(term == tolower(term) &
 				nchar(term) > min_len_normalize,
-				paste0(' ', paste(spacy_parse(sub('^ +| +$', '', term))$lemma,
-				collapse = ' '), ' '), term), by = .(conceptId, term)]
-			setindexv(TABLE, 'lemma')
+				paste0(' ', paste(spacy_parse(sub('^ +| +$', '',
+				term))$lemma, collapse = ' '), ' '), term),
+				by = list(conceptId, term)]
+			data.table::setindexv(TABLE, 'lemma')
 			assign(i, TABLE, envir = CDB)
 		}
 	}
@@ -80,41 +94,46 @@ addLemmaToCDB <- function(CDB, tablenames = c('FINDINGS',
 #' @param lemma lemma to match
 #' @param CDB concept database environment
 #' @param SNOMED SNOMED CT dictionary environment
+#' @param tablenames table names in CDB to check
 #' @return unique SNOMEDconcept vector of matches
-#' @seealso 
-#' @references 
-#' @examples
-findConceptMatch <- function(text, lemma = text, CDB, SNOMED){
+#' @export
+#' @seealso showparse, parseSentence, addLemmaToCDB
+findConceptMatch <- function(text, lemma = text, CDB, SNOMED, 
+	tablenames = c('FINDINGS', 'BODY', 'QUAL', 'LATERALITY',
+	'SEVERITY', 'CAUSES', 'MORPH')){
 	# A simple NER matching protocol = seeks a SNOMED CT match for
 	# a text. The text needs to be preceded and followed by spaces
 	# and must be lower case.
-	if (is.null(lemma)){
-		stop('Lemmas must be added to CDB using addLemmaToCDB')
-	}
+	
+	term <- lemma <- conceptId <- NULL
+
 	thelemma <- paste0(' ', paste(lemma, collapse = ' '), ' ')
 	text <- c(paste0(' ', paste(text, collapse = ' '), ' '),
 		paste0(' ', paste(tolower(text), collapse = ' '), ' '))
+	
 	# Return a vector of matched concepts
-	unique(as.SNOMEDconcept(c(
-		CDB$FINDINGS[term %in% text | lemma %in% thelemma]$conceptId,
-		CDB$QUAL[term %in% text | lemma %in% thelemma]$conceptId,
-		CDB$BODY[term %in% text | lemma %in% thelemma]$conceptId,
-		CDB$LATERALITY[term %in% text | lemma %in% thelemma]$conceptId,
-		CDB$SEVERITY[term %in% text | lemma %in% thelemma]$conceptId,
-		CDB$CAUSES[term %in% text | lemma %in% thelemma]$conceptId,
-		CDB$MORPH[term %in% text | lemma %in% thelemma]$conceptId),
-		SNOMED = SNOMED))
+	conceptIds <- get(tablenames[1], envir = CDB)[
+		term %in% text | lemma %in% thelemma]$conceptId
+	
+	if (length(tablenames) > 1){
+		for (tablename in tablenames[-1]){
+			conceptIds <- union(conceptIds, get(tablename, envir = CDB)[
+				term %in% text | lemma %in% thelemma]$conceptId)
+		}
+	}
+	conceptIds
 }
 
-#' Parse a sentence using spacy and find annotations
+#' Parse a sentence using spacy and find SNOMED CT annotations
 #'
-#' Parses a sentence using showparse, and finds annotations using
-#' findConceptMatch.
+#' Parses a sentence using showparse, and finds SNOMED CT annotations
+#' using findConceptMatch.
 #' @param text text phrase to match
 #' @param CDB concept database environment
 #' @param SNOMED SNOMED CT dictionary environment
 #' @param wordlimit maximum number of words in a phrase to attempt
 #'  to match to a SNOMED concept
+#' @param keep_all_matches whether to keep 
 #' @return spacy parse object (output of showparse) with an attribute
 #'  'annotations' which is a data.table with columns conceptId,
 #'  startword (index of first word of matched phrase),
@@ -127,13 +146,45 @@ findConceptMatch <- function(text, lemma = text, CDB, SNOMED){
 #'  concept attributes), link_to (concept that this concept is
 #'  an attribute of), laterality (SNOMED CT concept for laterality of
 #'  of concept
-#' @seealso showparse
-#' @references 
+#' @seealso showparse, findConceptMatch
+#' @export
 #' @examples
+#' # Create CDB for NER
+#' data.table::setDTthreads(threads = 1)
+#' require(Rdiagnosislist)
+#'
+#' SNOMED <- sampleSNOMED()
+#' miniCDB <- createCDB(SNOMED = SNOMED)
+#' miniCDB <- addLemmaToCDB(miniCDB)
+#'
+#' findConceptMatch('HF', CDB = miniCDB, SNOMED = SNOMED)
+#' # [1] "84114007 | Heart failure (disorder)"
+#'
+#' A <- parseSentence('He has heart failure', CDB = miniCDB,
+#'   SNOMED = SNOMED)
+#' A
+#' #      token   lemma  dep_rel head_token_id  semType
+#' #     <char>  <char>   <char>         <num>   <char>
+#' # 1:      He      He    nsubj             2     none
+#' # 2:     has     has     ROOT             2     none
+#' # 3:   heart   heart compound             4 disorder
+#' # 4: failure failure     dobj             2 disorder
+#'
+#' attr(A, 'annotations')
+#' #          conceptId startword endword startwhole endwhole  semType due_to
+#' #    <SNOMEDconcept>     <num>   <num>      <num>    <num>   <char> <list>
+#' # 1:        84114007         3       4          3        4 disorder [NULL]
+#' #    causing attributes link_to      laterality                     term
+#' #     <list>     <list>   <int> <SNOMEDconcept>                   <char>
+#' # 1:  [NULL]     [NULL]      NA            <NA> Heart failure (disorder)
 parseSentence <- function(text, CDB, SNOMED, wordlimit = 6,
 	keep_all_matches = FALSE){
 	# Option to keep all matches - not recommended as some small
 	# word matches may be incorrect in context
+	
+	# Declare column names for CRAN checks
+	semType <- term <- conceptId <- NULL
+	
 	as.SNOMEDconcept('', SNOMED = SNOMED) -> zeroconcept
 	D <- showparse(text)
 	# D is the parse table for text (one row per word)
@@ -193,11 +244,4 @@ parseSentence <- function(text, CDB, SNOMED, wordlimit = 6,
 	setattr(D, 'annotations', C)
 	# Now to refine the concept type
 	return(D)
-}
-
-# Helper function for R to convert a list into plain vector of
-# SNOMED CT concepts
-unique_unlist_int64 <- function(conceptIds){
-	as.SNOMEDconcept(unique(bit64::as.integer64(
-		unlist(lapply(conceptIds, as.character)))), SNOMED = SNOMED)
 }

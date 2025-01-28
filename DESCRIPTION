@@ -1,6 +1,6 @@
 Package: RdiagnosisNER
 Title: Named Entity Recognition for SNOMED CT Diagnosis Concepts
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: 
     person(given = "Anoop",
            family = "Shah",
@@ -15,7 +15,7 @@ Description: Functions for carrying out named entity recognition and
     level disease concept. For more information about 'SNOMED CT'
     visit <https://www.snomed.org/>.
 License: GPL-3
-Imports: data.table (>= 1.12.8), bit64, methods,
+Imports: data.table (>= 1.12.8), bit64,
     Rdiagnosislist (>= 1.4), spacyr
 Suggests: knitr, rmarkdown, testthat
 Encoding: UTF-8

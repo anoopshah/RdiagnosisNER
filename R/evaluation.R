@@ -32,15 +32,17 @@
 #' @export
 #' @importFrom data.table data.table
 #' @examples
+#' require(Rdiagnosislist)
+#' require(data.table)
 #' SNOMED <- sampleSNOMED()
 #'
 #' actual = data.table(id = c(2, 2, 3, 3, 3),
-#'   conceptId = as.SNOMEDconcept(
+#'   conceptId = as.SNOMEDconcept(c(
 #'   'Diastolic heart failure', 
 #'   'Systolic heart failure', 
 #'   'Systolic dysfunction', 
 #'   'Acute heart failure',
-#'   'Cardiac finding'))
+#'   'Cardiac finding')))
 #' # first two are correct, third concept is vaguer than gold standard
 #' # (i.e. true in 'relaxed' mode but not if relaxed = FALSE),
 #' # fourth concept is a false positive and fifth is an ancestor
@@ -59,7 +61,12 @@
 evaluateNER <- function(actual, goldstandard, relaxed = FALSE,
 	aggregate = TRUE, SNOMED = Rdiagnosislist::getSNOMED(),
 	subset = NULL){
-		
+	
+	# Declare column names for CRAN check
+	conceptId <- id <- found <- linked <- NULL
+	truepos <- falsepos <- falseneg <- F1 <- NULL
+	precision <- recall <- NULL
+	
 	# Prepare actual annotations for evaluation
 	A <- as.data.table(copy(actual))
 	if (!(all(c('id', 'conceptId') %in% names(A)))){

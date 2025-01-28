@@ -2,7 +2,7 @@
 % Please edit documentation in R/helpers.R
 \name{parseSentence}
 \alias{parseSentence}
-\title{Parse a sentence using spacy and find annotations}
+\title{Parse a sentence using spacy and find SNOMED CT annotations}
 \usage{
 parseSentence(text, CDB, SNOMED, wordlimit = 6, keep_all_matches = FALSE)
 }
@@ -15,6 +15,8 @@ parseSentence(text, CDB, SNOMED, wordlimit = 6, keep_all_matches = FALSE)
 
 \item{wordlimit}{maximum number of words in a phrase to attempt
 to match to a SNOMED concept}
+
+\item{keep_all_matches}{whether to keep}
 }
 \value{
 spacy parse object (output of showparse) with an attribute
@@ -31,9 +33,39 @@ spacy parse object (output of showparse) with an attribute
  of concept
 }
 \description{
-Parses a sentence using showparse, and finds annotations using
-findConceptMatch.
+Parses a sentence using showparse, and finds SNOMED CT annotations
+using findConceptMatch.
+}
+\examples{
+# Create CDB for NER
+data.table::setDTthreads(threads = 1)
+require(Rdiagnosislist)
+
+SNOMED <- sampleSNOMED()
+miniCDB <- createCDB(SNOMED = SNOMED)
+miniCDB <- addLemmaToCDB(miniCDB)
+
+findConceptMatch('HF', CDB = miniCDB, SNOMED = SNOMED)
+# [1] "84114007 | Heart failure (disorder)"
+
+A <- parseSentence('He has heart failure', CDB = miniCDB,
+  SNOMED = SNOMED)
+A
+#      token   lemma  dep_rel head_token_id  semType
+#     <char>  <char>   <char>         <num>   <char>
+# 1:      He      He    nsubj             2     none
+# 2:     has     has     ROOT             2     none
+# 3:   heart   heart compound             4 disorder
+# 4: failure failure     dobj             2 disorder
+
+attr(A, 'annotations')
+#          conceptId startword endword startwhole endwhole  semType due_to
+#    <SNOMEDconcept>     <num>   <num>      <num>    <num>   <char> <list>
+# 1:        84114007         3       4          3        4 disorder [NULL]
+#    causing attributes link_to      laterality                     term
+#     <list>     <list>   <int> <SNOMEDconcept>                   <char>
+# 1:  [NULL]     [NULL]      NA            <NA> Heart failure (disorder)
 }
 \seealso{
-showparse
+showparse, findConceptMatch
 }

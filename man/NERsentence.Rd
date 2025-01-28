@@ -49,6 +49,7 @@ These functions do not apply any disambiguation or context detection.
 }
 \examples{
 data.table::setDTthreads(threads = 1)
+require(Rdiagnosislist)
 
 # Create a mini CDB based on the sample SNOMED dictionary
 miniSNOMED <- sampleSNOMED()

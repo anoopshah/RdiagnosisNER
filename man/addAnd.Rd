@@ -29,4 +29,9 @@ addAnd(D, 4)
 \seealso{
 addAnd, findAllergy, findAttr, findBody, findCause,
   findLaterality, linkFrom, linkTo
+
+Other linkFunction: 
+\code{\link{findAllergy}()},
+\code{\link{linkFrom}()}
 }
+\concept{linkFunction}

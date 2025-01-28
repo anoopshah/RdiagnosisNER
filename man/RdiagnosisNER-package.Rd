@@ -10,18 +10,18 @@ diagnoses}
 This package works together with Rdiagnosislist to provide rule-based
 named entity recognition functionality including the ability to
 link basic concepts with attributes to more specific SNOMED CT
-concepts using the 'compose' function.
+concepts using the `compose' function.
 }
 \details{
 To use this package, first it is necessary to load a SNOMED
 dictionary and create a 'concept database' (CDB) lookup using the
-'loadSNOMED' and 'createCDB' functions in the Rdiagnosislist
+`loadSNOMED' and `createCDB' functions in the Rdiagnosislist
 package. It is then necessary to lemmatize the lookup terms using
 'addLemmaToCDB'.
 
 To use the SNOMED CT composition feature, it is then necessary to
-create a composition lookup using the 'decompose' function in
-Rdiagnosislist, and add it to the CDB using 'addComposeLookupToCDB'.
+create a composition lookup using the `decompose' function in
+Rdiagnosislist, and add it to the CDB using `addComposeLookupToCDB'.
 
 You can then use the named entity recognition tool by calling the
 relevant function:

@@ -26,8 +26,10 @@
 #'   set of distinct finding or disorder concepts extracted. 
 #'   NERcorpus returns a data.table with columns id (text document
 #'   identifier), conceptId and term.
+#' @importFrom Rdiagnosislist sampleSNOMED
 #' @examples
 #' data.table::setDTthreads(threads = 1)
+#' require(Rdiagnosislist)
 #'
 #' # Create a mini CDB based on the sample SNOMED dictionary
 #' miniSNOMED <- sampleSNOMED()
@@ -88,6 +90,11 @@
 #' @rdname NERsentence
 #' @export
 NERsentence <- function(text, CDB, SNOMED, noisy = TRUE){
+	
+	# Declare data.table variables for R CRAN check
+	startwhole <- endwhole <- conceptId <- term <- NULL
+	token_id <- semType <- NULL
+	
 	# Apply the spacy parser and do lookup for SNOMED CT concepts
 	D <- parseSentence(text, CDB, SNOMED)
 	
@@ -113,7 +120,7 @@ NERsentence <- function(text, CDB, SNOMED, noisy = TRUE){
 		if (nrow(C) > 0){
 			return(C[, list(startwhole = min(startwhole),
 				endwhole = max(endwhole)),
-				by = .(conceptId, term)][, .(conceptId, term,
+				by = list(conceptId, term)][, list(conceptId, term,
 				words = paste0(startwhole, '-', endwhole))])
 		} else {
 			return(data.table(conceptId = bit64::as.integer64(0),
@@ -168,7 +175,10 @@ NERsentence <- function(text, CDB, SNOMED, noisy = TRUE){
 #' @rdname NERsentence
 #' @export
 NERdocument <- function(text, CDB, SNOMED){
-	# returns 
+	
+	# Declare data.table variables for R CRAN check
+	sentence <- semType <- conceptId <- term <- NULL
+	
 	sentences <- strsplit(text, '\\\\n|\\. ')[[1]]
 	D <- lapply(seq_along(sentences), function(i){
 		x <- NERsentence(sentences[i], CDB, SNOMED,
@@ -192,8 +202,12 @@ NERdocument <- function(text, CDB, SNOMED){
 #' @rdname NERsentence
 #' @export
 NERcorpus <- function(texts, ids = seq_along(texts),
-	CDB, SNOMED){
+	CDB, SNOMED){		
 	# returns findings
+	
+	# Declare data.table variables for R CRAN check
+	semType <- conceptId <- term <- NULL
+	
 	if (length(ids) != length(texts)){
 		stop('ids must the same length as texts')
 	}

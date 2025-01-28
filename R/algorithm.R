@@ -4,6 +4,10 @@
 addToAttributes <- function(C, index_row, attr_rows){
 	# Adds a concept to the attribute list in the annotation table
 	# (called by addSemanticLinks and addProximityLinks)
+	
+	# Declare column names for CRAN check
+	startwhole <- endwhole <- NULL
+	
 	if (length(attr_rows) > 0){
 		C[index_row, attributes := list(unique(c(
 			C[attr_rows]$conceptId, attributes[[1]])))]
@@ -17,6 +21,10 @@ addLateralityBodyLinks <- function(D, CDB, SNOMED){
 	# Add semantic links based on spacy parsing for
 	# laterality and body site
 	# Store the results in the annotations table
+	
+	# Declare column names for CRAN check
+	startwhole <- endwhole <- conceptId <- laterality <- NULL
+	link_to <- NULL
 	
 	C <- attr(D, 'annotations')
 	if (nrow(C) == 0) return(D)
@@ -87,6 +95,10 @@ addLateralityBodyLinks <- function(D, CDB, SNOMED){
 addAttributeLinks <- function(D, CDB, SNOMED){
 	# Add semantic links based on spacy parsing
 	# Store the results in the annotations table
+	
+	# Declare column names for CRAN check
+	startwhole <- endwhole <- NULL
+	link_to <- NULL
 	
 	C <- attr(D, 'annotations')
 	if (nrow(C) == 0) return(D)
@@ -200,6 +212,10 @@ addCausalLinks <- function(D, CDB, SNOMED){
 	# findCause. Add the result to the due_to column of the
 	# annotations table
 	
+	# Declare column names for CRAN check
+	startwhole <- endwhole <- startword <- endword <- NULL
+	due_to <- NULL
+	
 	C <- attr(D, 'annotations')
 	if (nrow(C) == 0) return(D)
 	
@@ -234,6 +250,10 @@ addCausalLinks <- function(D, CDB, SNOMED){
 
 removeAncestorsD <- function(D, CDB, SNOMED){
 	# Remove concepts that are ancestors of another concept
+	
+	# Declare column names for CRAN check
+	semType <- conceptId <- NULL
+	
 	root_types <- c('finding', 'disorder')
 	C <- attr(D, 'annotations')
 	if (nrow(C) > 0){
@@ -251,6 +271,10 @@ removeAncestorsD <- function(D, CDB, SNOMED){
 removeSingleWordOverlappedFindingsD <- function(D){
 	# Remove single word findings that are overlapped by longer
 	# concepts (which are more likely to be correct)
+	
+	# Declare column names for CRAN check
+	semType <- startword <- NULL
+	
 	root_types <- c('finding', 'disorder')
 	C <- attr(D, 'annotations')
 	multiword_rows <- C$endwhole > C$startwhole &
@@ -294,9 +318,16 @@ remove_ancestors <- function(conceptIds, CDB = NULL,
 	conceptIds
 }
 
+#' @importFrom Rdiagnosislist compose
+#' @importFrom Rdiagnosislist description
 refineFindings <- function(D, CDB, SNOMED){
 	# Calls the 'compose' function which uses the composition lookup
 	# to refine the SNOMED finding
+	
+	# Declare column names for CRAN check
+	semType <- startwhole <- startword <- endwhole <- endword <- NULL
+	conceptId <- term <- NULL
+
 	if (is.null(CDB$COMPOSELOOKUP)){
 		# No composition performed 
 		return(D)
@@ -307,7 +338,8 @@ refineFindings <- function(D, CDB, SNOMED){
 	root_types <- c('finding', 'disorder', 'morphologic abnormality')
 	finding_rows <- C[, which(semType %in% root_types)]
 	for (i in finding_rows){
-		refined_conceptId <- compose(C[i]$conceptId, CDB = CDB,
+		refined_conceptId <- Rdiagnosislist::compose(
+			C[i]$conceptId, CDB = CDB,
 			attributes_conceptIds = c(C[i]$laterality, 
 			C[i]$attributes[[1]]),
 			due_to_conceptIds = C[i]$due_to[[1]],

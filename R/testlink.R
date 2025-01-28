@@ -42,8 +42,12 @@
 #' data(testlink_data)
 #' testlink_from_data(testlink_data)
 testlink_from_data <- function(testlink_data = NULL){
+	
+	# Declare column names for CRAN check
+	semType <- NULL
+	
 	if (is.null(testlink_data)){
-		data('testlink_data')
+		data('testlink_data', envir = environment())
 	}
 	D <- as.data.table(testlink_data)
 	D_expected <- strsplit(D$expected, '\\|')
@@ -65,6 +69,10 @@ testlink_from_data <- function(testlink_data = NULL){
 testlink <- function(linkFunction = c('addAnd',
 	'findLaterality', 'findAttr', 'findBody', 'findCause',
 	'findAllergy'), text, semTypes, i, expected = NULL){
+		
+	# Declare column names for CRAN check
+	semType <- NULL
+	
 	# Function to test semantic linkages
 	# semType can be a vector of semantic types or an abbreviated
 	# form where each character represents the semantic type of a word

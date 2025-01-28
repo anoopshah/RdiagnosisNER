@@ -1,6 +1,7 @@
 #### CAUSE ####
 
 #' @rdname findAttr
+#' @family linkFunction
 #' @export
 findCause <- function(D, i){
 	# Arguments:

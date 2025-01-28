@@ -24,3 +24,6 @@ Applies the 'spacy parse' function to a phrase.
 D <- showparse("fracture of left femur and right humerus")
 D
 }
+\seealso{
+parseSentence
+}

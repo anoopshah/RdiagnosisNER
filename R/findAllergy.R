@@ -6,6 +6,7 @@
 # ... intolerance
 # ... adverse reaction
 
+#' @family linkFunction
 #' @rdname findAttr
 #' @export
 findAllergy <- function(D, i){

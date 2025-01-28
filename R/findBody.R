@@ -1,6 +1,7 @@
 #### BODY STRUCTURE ####
 
 #' @rdname findAttr
+#' @family linkFunction
 #' @export
 findBody <- function(D, i){
 	# Arguments:

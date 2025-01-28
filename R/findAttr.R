@@ -15,7 +15,8 @@
 #'   vector if no link
 #' @seealso addAnd, findAllergy, findAttr, findBody, findCause,
 #'   findLaterality, linkFrom, linkTo
-#' @references 
+#' @family linkFunction
+#' @export
 #' @examples
 #' D <- showparse("ulcers of the left big and second toes due to diabetes")
 #' findAttr(D, 4)

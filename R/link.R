@@ -17,7 +17,7 @@
 #' @seealso addAnd, findAllergy, findAttr, findBody, findCause,
 #'   findLaterality, linkFrom, linkTo
 #' @export
-#' @references 
+#' @family linkFunction
 #' @examples
 #' D <- showparse("ulcers of the left big and second toes due to diabetes")
 linkFrom <- function(D, i, from = 'ANY', lemma_regex = '.*', to = 'ANY'){
@@ -53,6 +53,7 @@ linkFrom <- function(D, i, from = 'ANY', lemma_regex = '.*', to = 'ANY'){
 }
 
 #' @rdname linkFrom
+#' @family linkFunction
 #' @export
 linkTo <- function(D, i, to = 'ANY', lemma_regex = '.*', from = 'ANY'){
 	# Arguments:

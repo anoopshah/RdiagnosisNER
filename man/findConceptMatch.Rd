@@ -4,7 +4,13 @@
 \alias{findConceptMatch}
 \title{Find SNOMED CT concepts matching a portion of text}
 \usage{
-findConceptMatch(text, lemma = text, CDB, SNOMED)
+findConceptMatch(
+  text,
+  lemma = text,
+  CDB,
+  SNOMED,
+  tablenames = c("FINDINGS", "BODY", "QUAL", "LATERALITY", "SEVERITY", "CAUSES", "MORPH")
+)
 }
 \arguments{
 \item{text}{text phrase to match}
@@ -14,6 +20,8 @@ findConceptMatch(text, lemma = text, CDB, SNOMED)
 \item{CDB}{concept database environment}
 
 \item{SNOMED}{SNOMED CT dictionary environment}
+
+\item{tablenames}{table names in CDB to check}
 }
 \value{
 unique SNOMEDconcept vector of matches
@@ -22,4 +30,7 @@ unique SNOMEDconcept vector of matches
 This is a simple dictionary-based named entity recognition (NER)
 function. If there are multiple concepts with the same term,
 this function may return multiple matches.
+}
+\seealso{
+showparse, parseSentence, addLemmaToCDB
 }

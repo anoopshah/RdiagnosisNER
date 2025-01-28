@@ -32,3 +32,10 @@ detection. The function does not
 lemmatize terms which are partially or fully capitalised
 as these need to be matched in a case sensitive manner.
 }
+\examples{
+# Not run
+# CDB <- addLemmaToCDB(CDB)
+}
+\seealso{
+findConceptMatch
+}
