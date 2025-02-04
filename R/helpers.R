@@ -108,18 +108,26 @@ findConceptMatch <- function(text, lemma = text, CDB, SNOMED,
 	term <- lemma <- conceptId <- NULL
 
 	thelemma <- paste0(' ', paste(lemma, collapse = ' '), ' ')
-	text <- c(paste0(' ', paste(text, collapse = ' '), ' '),
+	theterm <- c(paste0(' ', paste(text, collapse = ' '), ' '),
 		paste0(' ', paste(tolower(text), collapse = ' '), ' '))
 	
 	# Return a vector of matched concepts
-	conceptIds <- get(tablenames[1], envir = CDB)[
-		term %in% text | lemma %in% thelemma]$conceptId
+	conceptIds <- c(get(tablenames[1], envir = CDB)[
+		term %in% theterm]$conceptId,
+		get(tablenames[1], envir = CDB)[
+		lemma %in% thelemma]$conceptId)
 	
 	if (length(tablenames) > 1){
 		for (tablename in tablenames[-1]){
-			conceptIds <- union(conceptIds, get(tablename, envir = CDB)[
-				term %in% text | lemma %in% thelemma]$conceptId)
+			conceptIds <- c(conceptIds,
+				get(tablename, envir = CDB)[
+				term %in% theterm]$conceptId,
+				get(tablename, envir = CDB)[
+				lemma %in% thelemma]$conceptId)
 		}
+	}
+	if (length(conceptIds) > 0){
+		conceptIds <- conceptIds[!duplicated(conceptIds)]
 	}
 	conceptIds
 }
