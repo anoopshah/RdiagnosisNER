@@ -29,7 +29,7 @@ showparse <- function(x, min_len_normalize = 5){
 	# Declare column names for CRAN check
 	token <- lemma <- dep_rel <- head_token_id <- NULL
 	
-	OUT <- as.data.table(spacy_parse(x, entity = TRUE,
+	OUT <- as.data.table(spacyr::spacy_parse(x, entity = TRUE,
 		remove_punct = TRUE, dependency = TRUE, lemma = TRUE,
 		pos = TRUE, output = 'data.frame'))[,
 		list(token, lemma, dep_rel, head_token_id)]
@@ -73,7 +73,7 @@ addLemmaToCDB <- function(CDB, tablenames = c('FINDINGS',
 			message('Lemmatizing ', i)
 			TABLE[, lemma := ifelse(term == tolower(term) &
 				nchar(term) > min_len_normalize,
-				paste0(' ', paste(spacy_parse(sub('^ +| +$', '',
+				paste0(' ', paste(spacyr::spacy_parse(sub('^ +| +$', '',
 				term))$lemma, collapse = ' '), ' '), term),
 				by = list(conceptId, term)]
 			data.table::setindexv(TABLE, 'lemma')
