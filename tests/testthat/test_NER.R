@@ -25,8 +25,13 @@ test_that('Testing NER sentence -- simple', {
 	expect_setequal(attr(OUT, 'findings')$conceptId,
 		sct_cardiomyopathy)
 
-	# Test NER sentence - simple
+	# Test NER sentence - simple with no concepts
 	OUT <- NERsentence('No concepts here',
+		CDB = miniCDB, SNOMED = SNOMED)
+	expect_setequal(sort(attr(OUT, 'findings')$conceptId),
+		zeroconcept)
+	
+	OUT <- NERsentence('Adjectival modifier',
 		CDB = miniCDB, SNOMED = SNOMED)
 	expect_setequal(sort(attr(OUT, 'findings')$conceptId),
 		zeroconcept)

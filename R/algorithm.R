@@ -253,15 +253,16 @@ removeAncestorsD <- function(D, CDB, SNOMED){
 	
 	# Declare column names for CRAN check
 	semType <- conceptId <- NULL
-	
+
 	root_types <- c('finding', 'disorder')
 	C <- attr(D, 'annotations')
+
 	if (nrow(C) > 0){
 		matchIds <- as.SNOMEDconcept(unique(
 			C[semType %in% root_types]$conceptId))
 		matchIds <- remove_ancestors(matchIds, CDB = CDB, 
 			SNOMED = SNOMED)
-		C[semType %in% root_types & !(conceptId %in% matchIds),
+		C[semType %in% root_types][!(conceptId %in% matchIds),
 			semType := paste0('excl_a_', semType)]
 		setattr(D, 'annotations', C)
 	}
@@ -284,7 +285,7 @@ removeSingleWordOverlappedFindingsD <- function(D){
 	if (sum(multiword_rows) > 0 & sum(singleword_rows) > 0){
 		multiword_pos <- unique(unlist(lapply(which(multiword_rows),
 			function(i){C[i]$startwhole:C[i]$endwhole})))
-		C[singleword_rows & startword %in% multiword_pos, 
+		C[singleword_rows][startword %in% multiword_pos, 
 			semType := paste0('excl_s_', semType)]
 	}
 	setattr(D, 'annotations', C)
