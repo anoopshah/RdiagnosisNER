@@ -4,13 +4,7 @@
 \alias{findConceptMatch}
 \title{Find SNOMED CT concepts matching a portion of text}
 \usage{
-findConceptMatch(
-  text,
-  lemma = text,
-  CDB,
-  SNOMED,
-  tablenames = c("FINDINGS", "BODY", "QUAL", "LATERALITY", "SEVERITY", "CAUSES", "MORPH")
-)
+findConceptMatch(text, lemma = text, CDB, SNOMED)
 }
 \arguments{
 \item{text}{text phrase to match}
@@ -20,8 +14,6 @@ findConceptMatch(
 \item{CDB}{concept database environment}
 
 \item{SNOMED}{SNOMED CT dictionary environment}
-
-\item{tablenames}{table names in CDB to check}
 }
 \value{
 unique SNOMEDconcept vector of matches

@@ -285,9 +285,30 @@ removeSingleWordOverlappedFindingsD <- function(D){
 	if (sum(multiword_rows) > 0 & sum(singleword_rows) > 0){
 		multiword_pos <- unique(unlist(lapply(which(multiword_rows),
 			function(i){C[i]$startwhole:C[i]$endwhole})))
-		C[singleword_rows][startword %in% multiword_pos, 
-			semType := paste0('excl_s_', semType)]
+		C[, semType := ifelse(singleword_rows & 
+			startword %in% multiword_pos,
+			paste0('excl_s_', semType), semType)]
 	}
+	setattr(D, 'annotations', C)
+	D
+}
+
+removeMultipleSingleWordFindingsD <- function(D){
+	# Remove single word findings which are linked to more than one
+	# SNOMED CT concept (e.g. acronyms)
+	
+	# Declare column names for CRAN check
+	semType <- startword <- NULL
+	
+	root_types <- c('finding', 'disorder')
+	C <- attr(D, 'annotations')
+	singleword_rows <- C$endwhole == C$startwhole &
+		C$semType %in% root_types
+	to_remove <- C[singleword_rows][, .N,
+		by = startwhole][N > 1]$startwhole
+	C[, semType := ifelse(singleword_rows & 
+		startwhole %in% to_remove & endwhole %in% to_remove,
+		paste0('excl_m_', semType), semType)]
 	setattr(D, 'annotations', C)
 	D
 }

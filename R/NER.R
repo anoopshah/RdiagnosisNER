@@ -95,6 +95,9 @@ NERsentence <- function(text, CDB, SNOMED, noisy = TRUE){
 	startwhole <- endwhole <- conceptId <- term <- NULL
 	token_id <- semType <- NULL
 	
+	# Avoid spacy parse error with blank string
+	if (text == ''){ text <- ' '}
+	
 	# Apply the spacy parser and do lookup for SNOMED CT concepts
 	D <- parseSentence(text, CDB, SNOMED)
 	
@@ -147,17 +150,27 @@ NERsentence <- function(text, CDB, SNOMED, noisy = TRUE){
 		}
 	}
 	
-	if (noisy){
-		cat(paste0('\nRemove ancestors of other concepts and\n',
-			'single word overlapped concepts in final output:\n'))
-	}
+	if (noisy) cat('\nRemove ancestors of other concepts:\n')
 
 	# Remove concepts that are ancestors of another concept (to tidy
 	# the output and leave only the most specific concepts)
 	D <- removeAncestorsD(D, CDB, SNOMED)
 	
+	if (noisy){
+		print(showannotations(D))
+		cat('\nRemove single word overlapped findings:\n')
+	}
+	
 	# Remove single word overlapped findings
 	D <- removeSingleWordOverlappedFindingsD(D)
+	
+	if (noisy){
+		print(showannotations(D))
+		cat('\nRemove single words mapped to multiple concepts:\n')
+	}
+	
+	# Remove single words that map to multiple findings
+	D <- removeMultipleSingleWordFindingsD(D)
 	
 	if (noisy) print(showannotations(D))
 	
@@ -167,6 +180,7 @@ NERsentence <- function(text, CDB, SNOMED, noisy = TRUE){
 	F <- F[!duplicated(F)]
 	setattr(D, 'findings', F)
 	if (noisy){
+		cat('\nFinal output:\n')
 		print(attr(D, 'findings'))
 	}
 	invisible(D)
@@ -202,7 +216,7 @@ NERdocument <- function(text, CDB, SNOMED){
 #' @rdname NERsentence
 #' @export
 NERcorpus <- function(texts, ids = seq_along(texts),
-	CDB, SNOMED){		
+	CDB, SNOMED){
 	# returns findings
 	
 	# Declare data.table variables for R CRAN check

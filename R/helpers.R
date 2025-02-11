@@ -37,52 +37,55 @@ showparse <- function(x, min_len_normalize = 5){
 	OUT
 }
 
-#' Add lemmatized versions of terms to a concept database (CDB)
+#' Add a LEMMA table to a concept database (CDB)
 #'
-#' Adds a 'lemma' column to the relevant tables within the concept
-#' database, using the spacy lemmatizer, in order to assist term
-#' detection. The function does not
+#' Adds a 'LEMMA' data.table containing the original term and lemmatized
+#' version for fast concept lookup. The function uses the spacy
+#' lemmatizer. The function does not
 #' lemmatize terms which are partially or fully capitalised
 #' as these need to be matched in a case sensitive manner.
 #' 
 #' @param CDB concept database environment
 #' @param tablenames which data tables to add lemmatized terms
-#' @param ignore_if_already TRUE or FALSE, whether to skip if
-#'   a table already has a lemma column
-#' @param min_len_normalize tokenswith fewer than this number of
+#' @param min_len_normalize tokens with fewer than this number of
 #'   characters will not be lemmatised
-#' @return CDB environment with lemma columns added to relevant tables
+#' @return CDB environment with an additional 'LEMMA' table. If it
+#'   already exists it will be over-written
 #' @importFrom spacyr spacy_parse
 #' @importFrom data.table setindexv
+#' @importFrom data.table setkeyv
 #' @seealso findConceptMatch
 #' @export
+#' @importFrom data.table data.table
+#' @importFrom data.table copy
 #' @examples
 #' # Not run
 #' # CDB <- addLemmaToCDB(CDB)
 addLemmaToCDB <- function(CDB, tablenames = c('FINDINGS', 
 	'QUAL', 'BODY', 'LATERALITY', 'SEVERITY', 'CAUSES', 'MORPH'),
-	ignore_if_already = TRUE, min_len_normalize = 5){
+	min_len_normalize = 5){
 		
 	# Declare column names for CRAN check
 	lemma <- term <- conceptId <- NULL
 	
-		
+	LEMMA <- data.table(term = character(0), 
+		conceptId = SNOMEDconcept(character(0)))
 	for (i in tablenames){
-		TABLE <- get(i, envir = CDB)
-		if ((!ignore_if_already) | (!('lemma' %in% names(TABLE)))){
-			message('Lemmatizing ', i)
-			TABLE[, lemma := ifelse(term == tolower(term) &
-				nchar(term) > min_len_normalize,
-				paste0(' ', paste(spacyr::spacy_parse(sub('^ +| +$', '',
-				term))$lemma, collapse = ' '), ' '), term),
-				by = list(conceptId, term)]
-			data.table::setindexv(TABLE, 'lemma')
-			assign(i, TABLE, envir = CDB)
-		}
+		message('Lemmatizing ', i)
+		TABLE <- copy(get(i, envir = CDB)[, list(conceptId, term)])
+		LEMMA <- rbind(LEMMA, TABLE)
 	}
+	LEMMA <- LEMMA[!duplicated(LEMMA)]
+	LEMMA[, lemma := ifelse(term == tolower(term) &
+		nchar(term) > min_len_normalize,
+		paste0(' ', paste(spacyr::spacy_parse(sub('^ +| +$', '',
+		term))$lemma, collapse = ' '), ' '), term),
+		by = list(conceptId, term)]
+	data.table::setkeyv(LEMMA, 'lemma')
+	data.table::setindexv(LEMMA, 'term')
+	CDB$LEMMA <- LEMMA
 	return(CDB)
 }
-
 
 #' Find SNOMED CT concepts matching a portion of text
 #'
@@ -94,42 +97,23 @@ addLemmaToCDB <- function(CDB, tablenames = c('FINDINGS',
 #' @param lemma lemma to match
 #' @param CDB concept database environment
 #' @param SNOMED SNOMED CT dictionary environment
-#' @param tablenames table names in CDB to check
 #' @return unique SNOMEDconcept vector of matches
 #' @export
 #' @seealso showparse, parseSentence, addLemmaToCDB
-findConceptMatch <- function(text, lemma = text, CDB, SNOMED, 
-	tablenames = c('FINDINGS', 'BODY', 'QUAL', 'LATERALITY',
-	'SEVERITY', 'CAUSES', 'MORPH')){
+findConceptMatch <- function(text, lemma = text, CDB, SNOMED){
 	# A simple NER matching protocol = seeks a SNOMED CT match for
 	# a text. The text needs to be preceded and followed by spaces
 	# and must be lower case.
 	
-	term <- lemma <- conceptId <- NULL
+	term <- conceptId <- NULL
 
 	thelemma <- paste0(' ', paste(lemma, collapse = ' '), ' ')
 	theterm <- c(paste0(' ', paste(text, collapse = ' '), ' '),
 		paste0(' ', paste(tolower(text), collapse = ' '), ' '))
 	
 	# Return a vector of matched concepts
-	conceptIds <- c(get(tablenames[1], envir = CDB)[
-		term %in% theterm]$conceptId,
-		get(tablenames[1], envir = CDB)[
-		lemma %in% thelemma]$conceptId)
-	
-	if (length(tablenames) > 1){
-		for (tablename in tablenames[-1]){
-			conceptIds <- c(conceptIds,
-				get(tablename, envir = CDB)[
-				term %in% theterm]$conceptId,
-				get(tablename, envir = CDB)[
-				lemma %in% thelemma]$conceptId)
-		}
-	}
-	if (length(conceptIds) > 0){
-		conceptIds <- conceptIds[!duplicated(conceptIds)]
-	}
-	conceptIds
+	union(CDB$LEMMA[term %in% theterm]$conceptId,
+		CDB$LEMMA[lemma %in% thelemma]$conceptId)
 }
 
 #' Parse a sentence using spacy and find SNOMED CT annotations
@@ -156,6 +140,9 @@ findConceptMatch <- function(text, lemma = text, CDB, SNOMED,
 #'  of concept
 #' @seealso showparse, findConceptMatch
 #' @export
+#' @importFrom data.table data.table
+#' @importFrom data.table as.data.table
+#' @importFrom data.table is.data.table
 #' @examples
 #' # Create CDB for NER
 #' data.table::setDTthreads(threads = 1)
@@ -193,7 +180,6 @@ parseSentence <- function(text, CDB, SNOMED, wordlimit = 6,
 	# Declare column names for CRAN checks
 	semType <- term <- conceptId <- NULL
 	
-	as.SNOMEDconcept('', SNOMED = SNOMED) -> zeroconcept
 	D <- showparse(text)
 	# D is the parse table for text (one row per word)
 	D[, semType := 'none']
@@ -202,13 +188,13 @@ parseSentence <- function(text, CDB, SNOMED, wordlimit = 6,
 	# startword, endword are the start and end of this concept
 	# startwhole, endwhole are the start and end of the final concept
 	#   when combined with attributes
-	C <- data.table(conceptId = zeroconcept,
+	C <- data.table(conceptId = SNOMEDconcept(character(0)),
 		startword = integer(0), endword = integer(0),
 		startwhole = integer(0), endwhole = integer(0),
-		semType = character(0), due_to = list(zeroconcept),
-		causing = list(zeroconcept),
-		attributes = list(zeroconcept), link_to = integer(0),
-		laterality = zeroconcept, term = character(0))
+		semType = character(0), due_to = list(0),
+		causing = list(0),
+		attributes = list(0), link_to = integer(0),
+		laterality = SNOMEDconcept(character(0)), term = character(0))
 	# Linking by token and lemma
 	# Search for matches up to (wordlimit) words
 	i = 1

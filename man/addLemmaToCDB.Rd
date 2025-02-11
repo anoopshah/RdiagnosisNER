@@ -2,12 +2,11 @@
 % Please edit documentation in R/helpers.R
 \name{addLemmaToCDB}
 \alias{addLemmaToCDB}
-\title{Add lemmatized versions of terms to a concept database (CDB)}
+\title{Add a LEMMA table to a concept database (CDB)}
 \usage{
 addLemmaToCDB(
   CDB,
   tablenames = c("FINDINGS", "QUAL", "BODY", "LATERALITY", "SEVERITY", "CAUSES", "MORPH"),
-  ignore_if_already = TRUE,
   min_len_normalize = 5
 )
 }
@@ -16,19 +15,17 @@ addLemmaToCDB(
 
 \item{tablenames}{which data tables to add lemmatized terms}
 
-\item{ignore_if_already}{TRUE or FALSE, whether to skip if
-a table already has a lemma column}
-
-\item{min_len_normalize}{tokenswith fewer than this number of
+\item{min_len_normalize}{tokens with fewer than this number of
 characters will not be lemmatised}
 }
 \value{
-CDB environment with lemma columns added to relevant tables
+CDB environment with an additional 'LEMMA' table. If it
+  already exists it will be over-written
 }
 \description{
-Adds a 'lemma' column to the relevant tables within the concept
-database, using the spacy lemmatizer, in order to assist term
-detection. The function does not
+Adds a 'LEMMA' data.table containing the original term and lemmatized
+version for fast concept lookup. The function uses the spacy
+lemmatizer. The function does not
 lemmatize terms which are partially or fully capitalised
 as these need to be matched in a case sensitive manner.
 }

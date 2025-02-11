@@ -35,6 +35,11 @@ test_that('Testing NER sentence -- simple', {
 		CDB = miniCDB, SNOMED = SNOMED)
 	expect_setequal(sort(attr(OUT, 'findings')$conceptId),
 		zeroconcept)
+	
+	OUT <- NERsentence('',
+		CDB = miniCDB, SNOMED = SNOMED)
+	expect_setequal(sort(attr(OUT, 'findings')$conceptId),
+		zeroconcept)
 })
 
 test_that('Testing NER sentence with concept composition', {
