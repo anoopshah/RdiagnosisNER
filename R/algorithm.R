@@ -41,14 +41,12 @@ addLateralityBodyLinks <- function(D, CDB, SNOMED){
 	for (i in 1:nrow(C)){
 		if (C[i]$semType %in% c('body structure', 'finding', 'disorder')){
 			# if body site has intrinsic laterality, record it
-			intrinsic_laterality <- CDB$BODY_LATERALITY[
-				conceptId %in% C[i]$conceptId]$laterality
-			if (identical(intrinsic_laterality, 'Right')){
-				C[i, laterality := CDB$latConcepts['Right']]
-				# SNOMED concept 24028007
-			} else if (identical(intrinsic_laterality, 'Left')){
-				C[i, laterality := CDB$latConcepts['Left']]
-				# SNOMED concept 7771000
+			intrinsic_laterality <- unique(CDB$BODY[
+				conceptId %in% C[i]$conceptId]$laterality)
+			if (length(intrinsic_laterality) == 1){
+				if (intrinsic_laterality %in% c('Right', 'Left', 'Bilateral')){
+					C[i, laterality := CDB$latConcepts[intrinsic_laterality]]
+				}
 			} else {
 				attr_rows <- find_C_rows(
 					findLaterality(D, C[i]$startword:C[i]$endword))
@@ -64,27 +62,45 @@ addLateralityBodyLinks <- function(D, CDB, SNOMED){
 		}
 	}
 
-	# Body site and transfer laterality
+	# Body site
 	for (i in 1:nrow(C)){
 		if (C[i]$semType %in% c('finding', 'disorder', 'morphologic abnormality')){
 			attr_rows <- find_C_rows(findBody(D, C[i]$startword:C[i]$endword))
 			if (length(attr_rows) > 0){
 				C[attr_rows, link_to := i]
 				C <- addToAttributes(C, i, attr_rows)
-				# Transfer laterality to corresponding finding if finding
-				# does not have a laterality
-				new_lat_conceptId <- unique(C[attr_rows]$laterality)
-				if (length(new_lat_conceptId) == 1){
-					if (is.na(C[i]$laterality)){
-						C[i, laterality := new_lat_conceptId]
-					} else {
-						if (!identical(C[i]$laterality, new_lat_conceptId)){
-							# remove laterality as it is ambiguous
-							C[i, laterality := bit64::as.integer64(NA)]
-						}
-					}
-				}
 			}
+		}
+	}
+
+	setattr(D, 'annotations', C)
+	return(D)
+}
+
+addLateralityTransfer <- function(D, CDB, SNOMED){
+	# Transfer laterality from a linked body site to the
+	# corresponding finding
+	
+	# Declare column names for CRAN check
+	conceptId <- laterality <- link_to <- NULL
+	
+	C <- attr(D, 'annotations')
+	if (nrow(C) == 0) return(D)
+	
+	# Body site and transfer laterality
+	for (i in 1:nrow(C)){
+		if (C[i]$semType %in% c('finding', 'disorder',
+			'morphologic abnormality')){
+			linked_lat <- unique(C[link_to == i]$laterality)
+			linked_lat <- linked_lat[!is.na(linked_lat)]
+			if (length(linked_lat) == 1){
+				if (is.na(C[i]$laterality)){
+					C[i, laterality := linked_lat]
+				} else if (C[i]$laterality != linked_lat){
+					# ambiguous laterality - remove
+					C[i, laterality := bit64::as.integer64(NA)]
+				}
+			} 
 		}
 	}
 
@@ -293,19 +309,27 @@ removeSingleWordOverlappedFindingsD <- function(D){
 	D
 }
 
-removeMultipleSingleWordFindingsD <- function(D){
+removeAmbiguousSingleWordFindingsD <- function(D,
+	unigram_blacklist = NULL){
 	# Remove single word findings which are linked to more than one
-	# SNOMED CT concept (e.g. acronyms)
+	# SNOMED CT concept (e.g. acronyms) or are blacklisted
 	
 	# Declare column names for CRAN check
-	semType <- startword <- NULL
-	
+	semType <- startword <- startwhole <- endwhole <- N <- NULL
+
 	root_types <- c('finding', 'disorder')
 	C <- attr(D, 'annotations')
 	singleword_rows <- C$endwhole == C$startwhole &
 		C$semType %in% root_types
 	to_remove <- C[singleword_rows][, .N,
 		by = startwhole][N > 1]$startwhole
+	if (!is.null(unigram_blacklist)){
+		B <- data.table(
+			conceptId = C[singleword_rows]$conceptId, 
+			pos = C[singleword_rows]$startwhole,
+			term = tolower(D[C[singleword_rows]$startwhole]$token))
+		to_remove <- c(to_remove, merge(B, unigram_blacklist)$pos)
+	}
 	C[, semType := ifelse(singleword_rows & 
 		startwhole %in% to_remove & endwhole %in% to_remove,
 		paste0('excl_m_', semType), semType)]
@@ -365,7 +389,6 @@ refineFindings <- function(D, CDB, SNOMED){
 			attributes_conceptIds = c(C[i]$laterality, 
 			C[i]$attributes[[1]]),
 			due_to_conceptIds = C[i]$due_to[[1]],
-			with_conceptIds = C[finding_rows]$conceptId,
 			SNOMED = SNOMED)
 		if (identical(C[i]$conceptId, refined_conceptId)){
 			# Other attributes are irrelevant for this concept

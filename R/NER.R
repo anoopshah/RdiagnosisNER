@@ -12,6 +12,12 @@
 #'   the composition lookup has been added using addComposeLookupToCDB
 #'   and terms have been lemmatized using addLemmaToCDB
 #' @param noisy TRUE or FALSE, whether to display intermediate results
+#' @param unigram_blacklist data.frame or data.table with columns conceptId
+#'   (character or integer64) and term (character, non-case sensitive)
+#'   which
+#'   contains a list of one-character terms and conceptIds that can be
+#'   used for concept composition but should be removed in the final
+#'   output because they may cause errors.
 #' @seealso addLemmaToCDB
 #' @return NERsentence and NERdocument returns a data.table containing
 #'   spacy parse variables: token (the token itself), lemma (spacy
@@ -89,11 +95,15 @@
 #' 
 #' @rdname NERsentence
 #' @export
-NERsentence <- function(text, CDB, SNOMED, noisy = TRUE){
+NERsentence <- function(text, CDB, SNOMED, noisy = TRUE,
+	unigram_blacklist = NULL){
 	
 	# Declare data.table variables for R CRAN check
 	startwhole <- endwhole <- conceptId <- term <- NULL
 	token_id <- semType <- NULL
+	
+	unigram_blacklist <- process_blacklist(unigram_blacklist,
+		SNOMED = SNOMED)
 	
 	# Avoid spacy parse error with blank string
 	if (text == ''){ text <- ' '}
@@ -109,6 +119,9 @@ NERsentence <- function(text, CDB, SNOMED, noisy = TRUE){
 	
 	# Add attributes based on proximity
 	D <- addProximityLinks(D, CDB, SNOMED)
+	
+	# Transfer laterality
+	D <- addLateralityTransfer(D, CDB, SNOMED)
 	
 	if (noisy){
 		cat('\nParsed text:\n')
@@ -166,11 +179,11 @@ NERsentence <- function(text, CDB, SNOMED, noisy = TRUE){
 	
 	if (noisy){
 		print(showannotations(D))
-		cat('\nRemove single words mapped to multiple concepts:\n')
+		cat('\nRemove multiple or blacklisted single word findings:\n')
 	}
 	
-	# Remove single words that map to multiple findings
-	D <- removeMultipleSingleWordFindingsD(D)
+	# Remove multiple or blacklisted single word findings
+	D <- removeAmbiguousSingleWordFindingsD(D, unigram_blacklist)
 	
 	if (noisy) print(showannotations(D))
 	
@@ -188,15 +201,18 @@ NERsentence <- function(text, CDB, SNOMED, noisy = TRUE){
 
 #' @rdname NERsentence
 #' @export
-NERdocument <- function(text, CDB, SNOMED){
+NERdocument <- function(text, CDB, SNOMED, unigram_blacklist = NULL){
 	
 	# Declare data.table variables for R CRAN check
 	sentence <- semType <- conceptId <- term <- NULL
 	
+	unigram_blacklist <- process_blacklist(unigram_blacklist,
+		SNOMED = SNOMED)
+	
 	sentences <- strsplit(text, '\\\\n|\\. ')[[1]]
 	D <- lapply(seq_along(sentences), function(i){
 		x <- NERsentence(sentences[i], CDB, SNOMED,
-			noisy = FALSE)
+			noisy = FALSE, unigram_blacklist)
 		x[, sentence := i]
 		x
 	})
@@ -216,17 +232,20 @@ NERdocument <- function(text, CDB, SNOMED){
 #' @rdname NERsentence
 #' @export
 NERcorpus <- function(texts, ids = seq_along(texts),
-	CDB, SNOMED){
+	CDB, SNOMED, unigram_blacklist = NULL){
 	# returns findings
 	
 	# Declare data.table variables for R CRAN check
 	semType <- conceptId <- term <- NULL
 	
+	unigram_blacklist <- process_blacklist(unigram_blacklist,
+		SNOMED = SNOMED)
+	
 	if (length(ids) != length(texts)){
 		stop('ids must the same length as texts')
 	}
 	D <- lapply(seq_along(ids), function(i){
-		NERdocument(texts[i], CDB, SNOMED)
+		NERdocument(texts[i], CDB, SNOMED, unigram_blacklist)
 	})
 	F <- rbindlist(lapply(seq_along(ids), function(i){
 		if (nrow(attr(D[[i]], 'annotations')) == 0){
@@ -240,5 +259,24 @@ NERcorpus <- function(texts, ids = seq_along(texts),
 		}
 	}))
 	F[!duplicated(F)]
+}
+
+process_blacklist <- function(unigram_blacklist = NULL, SNOMED = SNOMED){
+	if (is.null(unigram_blacklist)){
+		return(NULL)
+	}
+	if ('unigram_blacklist' %in% class(unigram_blacklist)){
+		return(unigram_blacklist)
+	}
+	unigram_blacklist <- as.data.table(unigram_blacklist)
+	unigram_blacklist[, conceptId := as.SNOMEDconcept(conceptId,
+		SNOMED = SNOMED)]
+	unigram_blacklist[, term := tolower(gsub('^ *| *$', '', term))]
+	unigram_blacklist <- unigram_blacklist[!duplicated(unigram_blacklist)]
+	setkeyv(unigram_blacklist, 'term')
+	setindexv(unigram_blacklist, 'conceptId')
+	setattr(unigram_blacklist, 'class', c('unigram_blacklist',
+		'data.table', 'data.frame'))
+	unigram_blacklist
 }
 

@@ -6,11 +6,11 @@
 \alias{NERcorpus}
 \title{Analyse a sentence, document or corpus}
 \usage{
-NERsentence(text, CDB, SNOMED, noisy = TRUE)
+NERsentence(text, CDB, SNOMED, noisy = TRUE, unigram_blacklist = NULL)
 
-NERdocument(text, CDB, SNOMED)
+NERdocument(text, CDB, SNOMED, unigram_blacklist = NULL)
 
-NERcorpus(texts, ids = seq_along(texts), CDB, SNOMED)
+NERcorpus(texts, ids = seq_along(texts), CDB, SNOMED, unigram_blacklist = NULL)
 }
 \arguments{
 \item{text}{a single text to analyse}
@@ -22,6 +22,13 @@ and terms have been lemmatized using addLemmaToCDB}
 \item{SNOMED}{environment containing a SNOMED dictionary}
 
 \item{noisy}{TRUE or FALSE, whether to display intermediate results}
+
+\item{unigram_blacklist}{data.frame or data.table with columns conceptId
+(character or integer64) and term (character, non-case sensitive)
+which
+contains a list of one-character terms and conceptIds that can be
+used for concept composition but should be removed in the final
+output because they may cause errors.}
 
 \item{texts}{a character vector of texts to analyse}
 

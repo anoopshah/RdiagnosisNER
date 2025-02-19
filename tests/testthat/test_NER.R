@@ -25,6 +25,14 @@ test_that('Testing NER sentence -- simple', {
 	expect_setequal(attr(OUT, 'findings')$conceptId,
 		sct_cardiomyopathy)
 
+	# Test NER sentence - blacklisted
+	OUT <- NERsentence('Cardiomyopathy',
+		CDB = miniCDB, SNOMED = SNOMED,
+		unigram_blacklist = data.table(conceptId = 'Cardiomyopathy',
+		term = 'Cardiomyopathy'))
+	expect_setequal(attr(OUT, 'findings')$conceptId,
+		zeroconcept)
+
 	# Test NER sentence - simple with no concepts
 	OUT <- NERsentence('No concepts here',
 		CDB = miniCDB, SNOMED = SNOMED)

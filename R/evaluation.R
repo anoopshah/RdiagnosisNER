@@ -72,6 +72,7 @@ evaluateNER <- function(actual, goldstandard, relaxed = FALSE,
 	if (!(all(c('id', 'conceptId') %in% names(A)))){
 		stop('actual must contain columns id and conceptId')
 	}
+	A[, conceptId := as.SNOMEDconcept(conceptId, SNOMED = SNOMED)]
 	if (!is.null(subset)){
 		subset <- as.SNOMEDconcept(subset, SNOMED = SNOMED)
 	}
@@ -87,14 +88,13 @@ evaluateNER <- function(actual, goldstandard, relaxed = FALSE,
 	if (!(all(c('id', 'conceptId') %in% names(G_recall)))){
 		stop('goldstandard must contain columns id and conceptId')
 	}
-	G_recall[, conceptId := as.character(conceptId)]
 	# Ensure that conceptId fields with multiple entries have a
 	# consistent order to enable deduplication
-	G_recall[, conceptId := sapply(strsplit(conceptId, '\\|'),
+	G_recall[, conceptId := sapply(strsplit(as.character(conceptId), '\\|'),
 		function(x) paste(sort(unique(x)), collapse = '|'))]
 	G_recall <- G_recall[!duplicated(G_recall)]
 	# Now convert to SNOMEDconcept (integer64)
-	G_recall[, conceptId := lapply(strsplit(conceptId, '\\|'),
+	G_recall[, conceptId := lapply(strsplit(as.character(conceptId), '\\|'),
 		function(x) as.SNOMEDconcept(x, SNOMED = SNOMED))]
 	if (!is.null(subset)){
 		G_recall[, conceptId := lapply(conceptId, function(x)
