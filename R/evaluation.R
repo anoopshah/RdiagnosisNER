@@ -84,7 +84,8 @@ evaluateNER <- function(actual, goldstandard, relaxed = FALSE,
 		conceptId = remove_ancestors(conceptId,
 			SNOMED = SNOMED)), by = id]
 	
-	# Prepare gold standard for recall
+	# Prepare gold standard for recall - concepts that are expected
+	# to be in output
 	G_recall <- as.data.table(copy(goldstandard))
 	if (!(all(c('id', 'conceptId') %in% names(G_recall)))){
 		stop('goldstandard must contain columns id and conceptId')
@@ -101,28 +102,33 @@ evaluateNER <- function(actual, goldstandard, relaxed = FALSE,
 		G_recall[, conceptId := lapply(conceptId, function(x)
 			intersect(x, subset))]
 	}
-	# G_recall is a table of id with each linked concept separately
+	# G_recall is a table of id with each concept or set of concepts to
+	# link
 	ids <- unique(G_recall$id)
 	
-	# Prepare gold standard for precision
+	# Prepare gold standard for precision: set of valid conceptIds
+	# for each text (remove ancestors)
 	G_precision <- data.table(id = ids, valid_conceptId = lapply(ids,
 		function(x){ remove_ancestors(
 			as.SNOMEDconcept(unlist(sapply(G_recall[id == x]$conceptId,
 			as.character)), SNOMED = SNOMED), SNOMED = SNOMED)
 		}))
 	# G_precision is a table of id with all linked concepts
-	# Remove unnecessary concepts from G_recall
+	
+	# Remove ancestors from G_recall
 	G_recall <- merge(G_recall, G_precision, by = 'id')
 	G_recall[, conceptId := lapply(1:.N, function(i){
 			intersect(G_recall[i]$conceptId[[1]],
 				G_recall[i]$valid_conceptId[[1]])
 		})]
-	G_recall <- G_recall[sapply(conceptId, function(x) length(x) > 0)]
-	# Now use A, G_recall and G_precision for checking
-	G_recall[, found := NA]
+	G_recall <- G_recall[sapply(conceptId, function(x) length(x) > 0)][,
+		list(id, conceptId, found = NA)]
+	
+	# Now record outputs against A and G_recall
 	A[, linked := NA]
 	
 	E <- rbindlist(lapply(ids, function(x){
+		# Process each document
 		if (any(A$id == x)){
 			if (relaxed){
 				G_recall[id == x, found := sapply(conceptId, function(i){
@@ -140,9 +146,11 @@ evaluateNER <- function(actual, goldstandard, relaxed = FALSE,
 					G_precision[id == x]$valid_conceptId[[1]],
 					SNOMED = SNOMED)
 			}
-			A[id == x, linked := ifelse(
-				length(the_valid_conceptIds) > 0,
-				conceptId %in% the_valid_conceptIds, FALSE)]
+			if (length(the_valid_conceptIds) > 0){
+				A[id == x, linked := conceptId %in% the_valid_conceptIds]
+			} else {
+				A[id == x, linked := FALSE]
+			}
 		} else {
 			G_recall[id == x, found := FALSE]
 		}
