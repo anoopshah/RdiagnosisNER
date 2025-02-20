@@ -31,6 +31,7 @@
 #' @seealso NERcorpus
 #' @export
 #' @importFrom data.table data.table
+#' @importFrom Rdiagnosislist as.SNOMEDconcept
 #' @examples
 #' require(Rdiagnosislist)
 #' require(data.table)
@@ -128,17 +129,20 @@ evaluateNER <- function(actual, goldstandard, relaxed = FALSE,
 					any(i %in% descendants(A[id == x]$conceptId,
 						SNOMED = SNOMED, include_self = TRUE))
 				})]
-				A[id == x, linked := conceptId %in%
-					ancestors(G_precision[id == x]$valid_conceptId[[1]],
-					SNOMED = SNOMED, include_self = TRUE)]
+				the_valid_conceptIds <- ancestors(
+					G_precision[id == x]$valid_conceptId[[1]],
+					SNOMED = SNOMED, include_self = TRUE)
 			} else {
 				G_recall[id == x, found := sapply(conceptId, function(i){
 					any(i %in% A[id == x]$conceptId)
 				})]
-				A[id == x, linked := conceptId %in% as.SNOMEDconcept(
+				the_valid_conceptIds <- as.SNOMEDconcept(
 					G_precision[id == x]$valid_conceptId[[1]],
-					SNOMED = SNOMED)]
+					SNOMED = SNOMED)
 			}
+			A[id == x, linked := ifelse(
+				length(the_valid_conceptIds) > 0,
+				conceptId %in% the_valid_conceptIds, FALSE)]
 		} else {
 			G_recall[id == x, found := FALSE]
 		}
