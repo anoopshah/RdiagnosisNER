@@ -37,24 +37,24 @@ addAnd <- function(D, i){
 	# regular expressions
 	i_and <- i
 	if (min(i) > 2){
-		if (paste(D$lemma[min(i) - 2], D$lemma[min(i) - 1]) %like%
+		if (tolower(paste(D$lemma[min(i) - 2], D$lemma[min(i) - 1])) %like%
 			'^and (his|her|its|their|the|a|one)$'){
 			i_and <- union(i_and, min(i) - 3)
 		}
 	}
 	if (min(i) > 1){
-		if (D$lemma[min(i) - 1] == 'and'){
+		if (tolower(D$lemma[min(i) - 1]) == 'and'){
 			i_and <- union(i_and, min(i) - 2)
 		}
 	}
 	if (max(i) < nrow(D) - 1){
-		if (paste(D$lemma[max(i) + 1], D$lemma[max(i) + 2]) %like%
+		if (tolower(paste(D$lemma[max(i) + 1], D$lemma[max(i) + 2])) %like%
 			'^and (his|her|its|their|the|a|one)$'){
 			i_and <- union(i_and, max(i) + 3)
 		}
 	}
 	if (max(i) < nrow(D)){
-		if (D$lemma[min(i) + 1] == 'and'){
+		if (tolower(D$lemma[min(i) + 1]) == 'and'){
 			i_and <- union(i_and, max(i) + 2)
 		}
 	}

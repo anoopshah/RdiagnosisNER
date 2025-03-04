@@ -18,7 +18,7 @@ findBody <- function(D, i){
 	# Using regular expression
 	# e.g. fracture of femur, pain in foot
 	if (max(i) < nrow(D) - 1){
-		if (D$lemma[max(i) + 1] %in% c('of', 'on', 'in')){
+		if (tolower(D$lemma[max(i) + 1]) %in% c('of', 'on', 'in')){
 			i_body <- max(i) + 2
 		}
 	} 

@@ -41,13 +41,16 @@ addLateralityBodyLinks <- function(D, CDB, SNOMED){
 	for (i in 1:nrow(C)){
 		if (C[i]$semType %in% c('body structure', 'finding', 'disorder')){
 			# if body site has intrinsic laterality, record it
+			found_lat <- FALSE
 			intrinsic_laterality <- unique(CDB$BODY[
 				conceptId %in% C[i]$conceptId]$laterality)
 			if (length(intrinsic_laterality) == 1){
 				if (intrinsic_laterality %in% c('Right', 'Left', 'Bilateral')){
 					C[i, laterality := CDB$latConcepts[intrinsic_laterality]]
+					found_lat <- TRUE
 				}
-			} else {
+			} 
+			if (!found_lat) {
 				attr_rows <- find_C_rows(
 					findLaterality(D, C[i]$startword:C[i]$endword))
 				lat_conceptId <- unique(C[attr_rows]$conceptId)

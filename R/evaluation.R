@@ -86,10 +86,7 @@ evaluateNER <- function(actual, goldstandard, relaxed = FALSE,
 	
 	# Prepare gold standard for recall - concepts that are expected
 	# to be in output
-	G_recall <- as.data.table(copy(goldstandard))
-	if (!(all(c('id', 'conceptId') %in% names(G_recall)))){
-		stop('goldstandard must contain columns id and conceptId')
-	}
+	G_recall <- as.data.table(copy(goldstandard))[, list(id, conceptId)]
 	# Ensure that conceptId fields with multiple entries have a
 	# consistent order to enable deduplication
 	G_recall[, conceptId := sapply(strsplit(as.character(conceptId), '\\|'),
@@ -110,7 +107,7 @@ evaluateNER <- function(actual, goldstandard, relaxed = FALSE,
 	# for each text (remove ancestors)
 	G_precision <- data.table(id = ids, valid_conceptId = lapply(ids,
 		function(x){ remove_ancestors(
-			as.SNOMEDconcept(unlist(sapply(G_recall[id == x]$conceptId,
+			as.SNOMEDconcept(unlist(lapply(G_recall[id == x]$conceptId,
 			as.character)), SNOMED = SNOMED), SNOMED = SNOMED)
 		}))
 	# G_precision is a table of id with all linked concepts

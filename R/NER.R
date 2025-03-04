@@ -268,6 +268,10 @@ process_blacklist <- function(unigram_blacklist = NULL, SNOMED = SNOMED){
 	if ('unigram_blacklist' %in% class(unigram_blacklist)){
 		return(unigram_blacklist)
 	}
+	
+	# Declare variables for CRAN check
+	conceptId <- term <- NULL
+	
 	unigram_blacklist <- as.data.table(unigram_blacklist)
 	unigram_blacklist[, conceptId := as.SNOMEDconcept(conceptId,
 		SNOMED = SNOMED)]

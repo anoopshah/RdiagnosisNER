@@ -49,7 +49,8 @@ linkFrom <- function(D, i, from = 'ANY', lemma_regex = '.*', to = 'ANY'){
 	if (length(valid_to) == 0){
 		return(integer(0))
 	}
-	intersect(valid_to, which(D$lemma %like% lemma_regex))
+	intersect(valid_to, union(which(D$lemma %like% lemma_regex),
+		which(tolower(D$lemma) %like% lemma_regex)))
 }
 
 #' @rdname linkFrom
@@ -84,6 +85,7 @@ linkTo <- function(D, i, to = 'ANY', lemma_regex = '.*', from = 'ANY'){
 	if (length(valid_to) == 0){
 		return(integer(0))
 	}
-	intersect(valid_to, which(D$lemma %like% lemma_regex))
+	intersect(valid_to, union(which(D$lemma %like% lemma_regex),
+		which(tolower(D$lemma) %like% lemma_regex)))
 }
 

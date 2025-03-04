@@ -34,6 +34,7 @@ showparse <- function(x, min_len_normalize = 5){
 		pos = TRUE, output = 'data.frame'))[,
 		list(token, lemma, dep_rel, head_token_id)]
 	OUT[nchar(token) < min_len_normalize, lemma := token]
+	OUT[, lemma := tolower(lemma)]
 	OUT
 }
 
