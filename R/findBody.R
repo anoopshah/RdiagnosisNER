@@ -49,11 +49,12 @@ findBody <- function(D, i){
 	# Return potential body sites without negated items and without
 	# original (finding) concept
 	i_body <- setdiff(i_body, union(i, i_bodyneg))
-	i_body <- setdiff(addAnd(D, i_body), union(i, i_bodyneg))
+	# i_body <- setdiff(addAnd(D, i_body), union(i, i_bodyneg))
+	i_body <- setdiff(i_body, union(i, i_bodyneg))
 	
 	# Limit to body structure or laterality semantic types - note that
 	# laterality is linked to body structure before body structure
 	# is linked to finding
-	intersect(i_body, which(D$semType %in% c('body structure',
-		'laterality')))
+	return(intersect(i_body, which(D$semType %in% c('body structure',
+		'laterality'))))
 }

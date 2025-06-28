@@ -1,93 +1,93 @@
-"linkFunction","text","semTypes","index_start","index_end","expected"
-"addAnd","arm and leg","B B",1,1,"1 arm, 3 leg"
-"addAnd","arm and leg","B B",3,3,"1 arm, 3 leg"
-"addAnd","he hurt his arm and leg"," F B B",4,4,"4 arm, 6 leg"
-"addAnd","he hurt his arm and leg"," F B B",6,6,"4 arm, 6 leg"
-"addAnd","arm, leg and hand","B B B",5,5,"1 arm, 3 leg, 5 hand"
-"addAnd","arm, leg and hand","B B B",3,3,"1 arm, 3 leg, 5 hand"
-"addAnd","left or right","L L",1,1,"1 left"
-"addAnd","left or right","L L",3,3,"3 right"
-"addAnd","arm, leg or hand","B B B",1,1,"1 arm"
-"addAnd","arm, leg or hand","B B B",3,3,"3 leg"
-"addAnd","arm, leg or hand","B B B",5,5,"5 hand"
-"addAnd","arm and not leg","B  B",1,1,"1 arm|1 arm, 3 not"
-"addAnd","arm and leg and not hand","B B  B",1,1,"1 arm, 3 leg|1 arm, 3 leg, 5 not"
-"addAnd","arm and leg and not hand","B B  B",3,3,"1 arm, 3 leg|1 arm, 3 leg, 5 not"
-"addAnd","pain in both legs and feet","F LB B",4,4,"4 legs, 6 feet"
-"addAnd","pain in both legs and feet but not hands","F LB B  B",4,4,"4 legs, 6 feet"
-"addAnd","pain in both legs and feet but not hands","F LB B  B",6,6,"4 legs, 6 feet"
-"addAnd","pain in both legs and feet due to cancer and infection","F LB B  F F",4,4,"4 legs, 6 feet"
-"addAnd","pain in both legs and feet due to cancer and infection","F LB B  F F",6,6,"4 legs, 6 feet"
-"addAnd","pain in both legs and feet due to cancer and infection","F LB B  F F",9,9,"9 cancer, 11 infection"
-"addAnd","pain in both legs and feet due to cancer and infection","F LB B  F F",11,11,"9 cancer, 11 infection"
-"findCause","pneumonia due to immunosuppression","F  F",1,1,"4 immunosuppression"
-"findCause","pneumonia as a result of immunosuppression","F    F",1,1,"6 immunosuppression"
-"findCause","pneumonia caused by immunosuppression","F  F",1,1,"4 immunosuppression"
-"findCause","pneumonia caused by immunosuppression","F  F",1,1,"4 immunosuppression"
-"findCause","pneumonia causing immunosuppression","F F",3,3,"1 pneumonia"
-"findCause","pneumonia causing immunosuppression","F F",3,3,"1 pneumonia"
-"findCause","pneumonia following immunosuppression","F F",1,1,"3 immunosuppression"
-"findCause","pneumonia as a result of immunosuppression","F    F",1,1,"6 immunosuppression"
-"findCause","vomiting due to chemotherapy","F  P",1,1,"4 chemotherapy"
-"findCause","vomiting because of chemotherapy","F  P",1,1,"4 chemotherapy"
-"findCause","vomiting following chemotherapy","F P",1,1,"3 chemotherapy"
-"findCause","alcoholism related liver damage","F FF",3,4,"1 alcoholism"
-"findCause","vomiting after chemotherapy","F P",1,1,"3 chemotherapy"
-"findCause","allergy due to peanuts","F  S",1,1,"4 peanuts"
-"findCause","poisoning by carbon monoxide","F SS",1,1,"3 carbon"
-"findCause","osteoporosis following hypothyroidism","F F",1,1,"3 hypothyroidism"
-"findCause","cancer resulting in anaemia","F  F",4,4,"1 cancer"
-"findCause","he had cancer resulting in anaemia","  F  F",6,6,"3 cancer"
-"findBody","radial head fracture","BBF",3,3,"2 head"
-"findBody","radial head fracture bilaterally","BBFL",3,3,"2 head"
-"findBody","fracture of the left femur","F  LB",1,1,"5 femur"
-"findBody","right middle lobe pneumonia","LBBF",4,4,"3 lobe"
-"findBody","pneumonia of left lung due to cataract of the eye","F LB  F  B",1,1,"4 lung|3 left, 4 lung"
-"findBody","pneumonia of left lung due to cataract of the eye","F LB  F  B",7,7,"10 eye"
-"findBody","squamous cell carcinoma of the stomach","FFF  B","1","3","6 stomach"
-"findBody","stomach cancer","BF",2,2,"1 stomach"
-"findBody","liver cancer lung infection and kidney disease","BFBF BF",4,4,"3 lung"
-"findBody","chest and arm pain","B BF",4,4,"1 chest, 3 arm"
-"findBody","pain in chest and arm","F B B",1,1,"3 chest, 5 arm"
-"findBody","pain in chest but not arm","F B  B",1,1,"3 chest"
-"findBody","pain in chest and not arm","F B  B",1,1,"3 chest"
-"findBody","he infarcted his liver"," F B",2,2,"4 liver"
-"findBody","she cut her wrist"," F B",2,2,"4 wrist"
-"findBody","she cut her wrist and hand"," F B B",2,2,"4 wrist, 6 hand"
-"findBody","bruised elbow","FB",1,1,"2 elbow"
-"findBody","he had severe intrinsic asthma, fracture of the left ankle and rt humerus due to osteoporosis, and a left ingrowing thumbnail","  ZFF F  LB LB  F   LFB","4","5",
-"findBody","he had severe intrinsic asthma, fracture of the left ankle and rt humerus due to osteoporosis, and a left ingrowing thumbnail","  ZFF F  LB LB  F   LFB",7,7,"11 ankle, 13 rt"
-"findBody","abscess on his back","F  B",1,1,"4 back"
-"findBody","he has an abscess on his back","   F  B",4,4,"7 back"
-"findLaterality","he fractured his right finger"," D LB",5,5,"4 right"
-"findLaterality","he had right sided pain after a left heart attack","  LLF  LFF",5,5,"3 right"
-"findLaterality","left anterior cardinal vein","LBBB",4,4,"1 left"
-"findLaterality","abscesses of both thighs","F LB",4,4,"3 both"
-"findLaterality","bilateral leg oedema","LBF",3,3,"1 bilateral"
-"findLaterality","he has bilateral leg oedema","  LBF",5,5,"3 bilateral"
-"findLaterality","cataract right eye","FLB",3,3,"2 right"
-"findLaterality","right cataract","LF",2,2,"1 right"
-"findLaterality","left and right cataracts","L LF",4,4,"1 left, 3 right"
-"findLaterality","right and left cataracts","L LF",4,4,"1 right, 3 left"
-"findLaterality","cataract right","FL",1,1,"2 right"
-"findLaterality","left sided stroke due to right mca occlusion","L F  LFF",3,3,"1 left"
-"findLaterality","left sided stroke due to right mca occlusion","L F  LFF","7","8","6 right"
-"findLaterality","he left the diabetes clinic"," L F ",4,4,""
-"findLaterality","he was right about the diabetes","  L  F",6,6,""
-"findAttr","he has severe pneumonia","  ZF",4,4,"3 severe"
-"findAttr","open traumatic fracture of femur","  F B",3,3,"1 open, 2 traumatic"
-"findAttr","severe chronic pneumonia due to major immunosuppression","Z F   F",3,3,"1 severe, 2 chronic"
-"findAttr","severe, chronic pneumonia","Z  F",4,4,"1 severe, 3 chronic"
-"findAttr","the old man has severe pneumonia due to major flu","    ZF   F",6,6,"5 severe"
-"findAttr","nut allergy","SF",2,2,"1 nut"
-"findAttr","he has a nut allergy but is not allergic to seeds","   SF   F S",5,5,"4 nut"
-"findAllergy","intolerant of spicy foods","F SS",1,1,"4 foods"
-"findAllergy","gluten allergy","SF",2,2,"1 gluten"
-"findAllergy","severe egg allergy","ZSF",3,3,"2 egg"
-"findAllergy","gluten intolerance","SF",2,2,"1 gluten"
-"findAllergy","gluten adverse reaction","SFF","2","3","1 gluten"
-"findAllergy","adverse reaction to peanuts","FF S","1","2","4 peanuts"
-"findAllergy","allergic to eggs","F S",1,1,"3 eggs"
-"findAllergy","allergic to eggs and beans","F S S",1,1,"3 eggs, 5 beans"
-"findAllergy","allergic to eggs, cats and beans","F S S S",1,1,"3 eggs, 5 cats, 7 beans"
-"findAllergy","allergic to eggs and cats but not beans","F S S  S",1,1,"3 eggs, 5 cats"
+linkFunction,text,semTypes,index_start,index_end,expected
+addAnd,arm and leg,B B,1,1,"1 arm, 3 leg"
+addAnd,arm and leg,B B,3,3,"1 arm, 3 leg"
+addAnd,he hurt his arm and leg, F B B,4,4,"4 arm, 6 leg"
+addAnd,he hurt his arm and leg, F B B,6,6,"4 arm, 6 leg"
+addAnd,"arm, leg and hand",B B B,5,5,"1 arm, 3 leg, 5 hand"
+addAnd,"arm, leg and hand",B B B,3,3,"1 arm, 3 leg, 5 hand"
+addAnd,left or right,L L,1,1,1 left
+addAnd,left or right,L L,3,3,3 right
+addAnd,"arm, leg or hand",B B B,1,1,1 arm
+addAnd,"arm, leg or hand",B B B,3,3,3 leg
+addAnd,"arm, leg or hand",B B B,5,5,5 hand
+addAnd,arm and not leg,B  B,1,1,"1 arm|1 arm, 3 not"
+addAnd,arm and leg and not hand,B B  B,1,1,"1 arm, 3 leg|1 arm, 3 leg, 5 not"
+addAnd,arm and leg and not hand,B B  B,3,3,"1 arm, 3 leg|1 arm, 3 leg, 5 not"
+addAnd,pain in both legs and feet,F LB B,4,4,"4 legs, 6 feet"
+addAnd,pain in both legs and feet but not hands,F LB B  B,4,4,"4 legs, 6 feet"
+addAnd,pain in both legs and feet but not hands,F LB B  B,6,6,"4 legs, 6 feet"
+addAnd,pain in both legs and feet due to cancer and infection,F LB B  F F,4,4,"4 legs, 6 feet"
+addAnd,pain in both legs and feet due to cancer and infection,F LB B  F F,6,6,"4 legs, 6 feet"
+addAnd,pain in both legs and feet due to cancer and infection,F LB B  F F,9,9,"9 cancer, 11 infection"
+addAnd,pain in both legs and feet due to cancer and infection,F LB B  F F,11,11,"9 cancer, 11 infection"
+findCause,pneumonia due to immunosuppression,F  F,1,1,4 immunosuppression
+findCause,pneumonia as a result of immunosuppression,F    F,1,1,6 immunosuppression
+findCause,pneumonia caused by immunosuppression,F  F,1,1,4 immunosuppression
+findCause,pneumonia caused by immunosuppression,F  F,1,1,4 immunosuppression
+findCause,pneumonia causing immunosuppression,F F,3,3,1 pneumonia
+findCause,pneumonia causing immunosuppression,F F,3,3,1 pneumonia
+findCause,pneumonia following immunosuppression,F F,1,1,3 immunosuppression
+findCause,pneumonia as a result of immunosuppression,F    F,1,1,6 immunosuppression
+findCause,vomiting due to chemotherapy,F  P,1,1,4 chemotherapy
+findCause,vomiting because of chemotherapy,F  P,1,1,4 chemotherapy
+findCause,vomiting following chemotherapy,F P,1,1,3 chemotherapy
+findCause,alcoholism related liver damage,F FF,3,4,1 alcoholism
+findCause,vomiting after chemotherapy,F P,1,1,3 chemotherapy
+findCause,allergy due to peanuts,F  S,1,1,4 peanuts
+findCause,poisoning by carbon monoxide,F SS,1,1,3 carbon
+findCause,osteoporosis following hypothyroidism,F F,1,1,3 hypothyroidism
+findCause,cancer resulting in anaemia,F  F,4,4,1 cancer
+findCause,he had cancer resulting in anaemia,"  F  F",6,6,3 cancer
+findBody,radial head fracture,BBF,3,3,2 head
+findBody,radial head fracture bilaterally,BBFL,3,3,2 head
+findBody,fracture of the left femur,F  LB,1,1,5 femur
+findBody,right middle lobe pneumonia,LBBF,4,4,3 lobe
+findBody,pneumonia of left lung due to cataract of the eye,F LB  F  B,1,1,"4 lung|3 left, 4 lung"
+findBody,pneumonia of left lung due to cataract of the eye,F LB  F  B,7,7,10 eye
+findBody,squamous cell carcinoma of the stomach,FFF  B,1,3,6 stomach
+findBody,stomach cancer,BF,2,2,1 stomach
+findBody,liver cancer lung infection and kidney disease,BFBF BF,4,4,3 lung
+findBody,chest and arm pain,B BF,4,4,1 chest
+findBody,pain in chest and arm,F B B,1,1,"3 chest, 5 arm"
+findBody,pain in chest but not arm,F B  B,1,1,3 chest
+findBody,pain in chest and not arm,F B  B,1,1,3 chest
+findBody,he infarcted his liver," F B",2,2,4 liver
+findBody,she cut her wrist," F B",2,2,4 wrist
+findBody,she cut her wrist and hand," F B B",2,2,4 wrist
+findBody,bruised elbow,FB,1,1,2 elbow
+findBody,"he had severe intrinsic asthma, fracture of the left ankle and rt humerus due to osteoporosis, and a left ingrowing thumbnail","  ZFF F  LB LB  F   LFB",4,5,
+findBody,"he had severe intrinsic asthma, fracture of the left ankle and rt humerus due to osteoporosis, and a left ingrowing thumbnail","  ZFF F  LB LB  F   LFB",7,7,11 ankle
+findBody,abscess on his back,F  B,1,1,4 back
+findBody,he has an abscess on his back,"   F  B",4,4,7 back
+findLaterality,he fractured his right finger," D LB",5,5,4 right
+findLaterality,he had right sided pain after a left heart attack,"  LLF  LFF",5,5,3 right
+findLaterality,left anterior cardinal vein,LBBB,4,4,1 left
+findLaterality,abscesses of both thighs,F LB,4,4,3 both
+findLaterality,bilateral leg oedema,LBF,3,3,1 bilateral
+findLaterality,he has bilateral leg oedema,"  LBF",5,5,3 bilateral
+findLaterality,cataract right eye,FLB,3,3,2 right
+findLaterality,right cataract,LF,2,2,1 right
+findLaterality,left and right cataracts,L LF,4,4,"1 left, 3 right"
+findLaterality,right and left cataracts,L LF,4,4,"1 right, 3 left"
+findLaterality,cataract right,FL,1,1,2 right
+findLaterality,left sided stroke due to right mca occlusion,L F  LFF,3,3,1 left
+findLaterality,left sided stroke due to right mca occlusion,L F  LFF,7,8,6 right
+findLaterality,he left the diabetes clinic," L F ",4,4,
+findLaterality,he was right about the diabetes,"  L  F",6,6,
+findAttr,he has severe pneumonia,"  ZF",4,4,3 severe
+findAttr,open traumatic fracture of femur,"  F B",3,3,"1 open, 2 traumatic"
+findAttr,severe chronic pneumonia due to major immunosuppression,Z F   F,3,3,"1 severe, 2 chronic"
+findAttr,"severe, chronic pneumonia",Z  F,4,4,"1 severe, 3 chronic"
+findAttr,the old man has severe pneumonia due to major flu,"    ZF   F",6,6,5 severe
+findAttr,nut allergy,SF,2,2,1 nut
+findAttr,he has a nut allergy but is not allergic to seeds,"   SF   F S",5,5,4 nut
+findAllergy,intolerant of spicy foods,F SS,1,1,4 foods
+findAllergy,gluten allergy,SF,2,2,1 gluten
+findAllergy,severe egg allergy,ZSF,3,3,2 egg
+findAllergy,gluten intolerance,SF,2,2,1 gluten
+findAllergy,gluten adverse reaction,SFF,2,3,1 gluten
+findAllergy,adverse reaction to peanuts,FF S,1,2,4 peanuts
+findAllergy,allergic to eggs,F S,1,1,3 eggs
+findAllergy,allergic to eggs and beans,F S S,1,1,3 eggs
+findAllergy,"allergic to eggs, cats and beans",F S S S,1,1,3 eggs
+findAllergy,allergic to eggs and cats but not beans,F S S  S,1,1,3 eggs

@@ -70,7 +70,11 @@ addLateralityBodyLinks <- function(D, CDB, SNOMED){
 		if (C[i]$semType %in% c('finding', 'disorder', 'morphologic abnormality')){
 			attr_rows <- find_C_rows(findBody(D, C[i]$startword:C[i]$endword))
 			if (length(attr_rows) > 0){
-				C[attr_rows, link_to := i]
+				# Add and 
+				d_pos <- C[attr_rows, list(d_pos = startword:endword),
+					by = .I]$d_pos
+				attr_rows <- find_C_rows(addAnd(D, d_pos,
+					semtypes = c('body structure', 'laterality')))
 				C <- addToAttributes(C, i, attr_rows)
 			}
 		}
@@ -137,6 +141,11 @@ addAttributeLinks <- function(D, CDB, SNOMED){
 			attr_rows <- find_C_rows(c(
 				findAttr(D, C[i]$startword:C[i]$endword),
 				findCause(D, C[i]$startword:C[i]$endword)))
+			d_pos <- C[attr_rows, list(d_pos = startword:endword),
+				by = .I]$d_pos
+			attr_rows <- find_C_rows(addAnd(D, d_pos,
+				semtypes = c('finding', 'disorder', 'organism',
+				'substance', 'event', 'procedure', 'qualifier')))
 			if (length(attr_rows) > 0){
 				C[attr_rows, link_to := i]
 				C <- addToAttributes(C, i, attr_rows)
@@ -150,6 +159,10 @@ addAttributeLinks <- function(D, CDB, SNOMED){
 			attr_rows <- find_C_rows(
 				findAllergy(D, C[i]$startword:C[i]$endword))
 			if (length(attr_rows) > 0){
+				d_pos <- C[attr_rows, list(d_pos = startword:endword),
+					by = .I]$d_pos
+				attr_rows <- find_C_rows(addAnd(D, d_pos,
+					semtypes = c('substance')))
 				C[attr_rows, link_to := i]
 				C <- addToAttributes(C, i, attr_rows)
 			}
@@ -253,6 +266,11 @@ addCausalLinks <- function(D, CDB, SNOMED){
 				which(C$semType %in% root_types),
 				find_C_rows(findCause(D, C[i]$startword:C[i]$endword)))
 			if (length(attr_rows) > 0){
+				d_pos <- C[attr_rows, list(d_pos = startword:endword),
+					by = .I]$d_pos
+				attr_rows <- find_C_rows(addAnd(D, d_pos,
+					semtypes = c('finding', 'disorder', 'organism',
+					'substance', 'event', 'procedure')))
 				C[i, due_to := list(unique(
 					c(C[attr_rows]$conceptId, due_to[[1]])))]
 				C[i, startwhole := min(startwhole,

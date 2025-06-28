@@ -35,7 +35,8 @@ findAllergy <- function(D, i){
 	i_allergy <- c(i_allergy, findCause(D, i))
 	
 	# Return potential allergy links without negated items
-	i_allergy <- setdiff(addAnd(D, i_allergy), c(i, i_allergyneg))
+	# i_allergy <- setdiff(addAnd(D, i_allergy), c(i, i_allergyneg))
+	i_allergy <- setdiff(i_allergy, c(i, i_allergyneg))
 	
 	# Limit the output to substances only
 	intersect(i_allergy, which(D$semType == 'substance'))

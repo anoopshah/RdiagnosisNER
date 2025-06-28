@@ -65,6 +65,9 @@ findCause <- function(D, i){
 		}
 	}
 
-	intersect(addAnd(D, i_cause), which(D$semType %in% c('finding',
-		'disorder', 'organism', 'substance', 'event', 'procedure')))
+	# return(intersect(addAnd(D, i_cause),
+	# 	which(D$semType %in% c('finding',
+	# 	'disorder', 'organism', 'substance', 'event', 'procedure'))))
+	return(intersect(i_cause, which(D$semType %in% c('finding',
+		'disorder', 'organism', 'substance', 'event', 'procedure'))))
 }

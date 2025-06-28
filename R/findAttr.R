@@ -36,5 +36,6 @@ findAttr <- function(D, i){
 		return(integer(0))
 	}
 	i_desc <- linkTo(D, i, c('amod', 'compound', 'nmod'))
-	setdiff(addAnd(D, setdiff(i_desc, i)), i)
+	# return(setdiff(addAnd(D, setdiff(i_desc, i)), i))
+	return(setdiff(i_desc, i))
 }

@@ -1,13 +1,13 @@
 #' Link concepts by 'and'
 #'
 #' Finds concepts semantically related to the index concept using the
-#' conjunction 'and'. This function does not limit the output to
-#' concepts of a particular semantic type, which might have to be 
-#' filtered afterwards.
+#' conjunction 'and'.
 #' 
 #' @param D spacy parse table containing columns: token, lemma, dep_rel,
 #'   head, semType. Can be created by the 'showparse' function
 #' @param i = vector of indices of base word(s)
+#' @param semtypes = character vector of valid semantic types to return,
+#'   of NULL to return any semantic types
 #' @return integer vector of indices of linked words, or a zero length
 #'   vector if no link
 #' @seealso addAnd, findAllergy, findAttr, findBody, findCause,
@@ -17,7 +17,7 @@
 #' @examples
 #' D <- showparse("fracture of left femur and right humerus")
 #' addAnd(D, 4)
-addAnd <- function(D, i){
+addAnd <- function(D, i, semtypes = NULL){
 	# Arguments:
 	# D = spacy parse table containing columns: token, lemma, dep_rel,
 	#   head, semType 
@@ -31,7 +31,9 @@ addAnd <- function(D, i){
 	} else if (length(i) > 1){
 		# If more than one base word, recursively call the function
 		# for each item individually and combine the results
-		return(unique(unlist(lapply(i, function(j) addAnd(D, j)))))
+		return(unique(unlist(lapply(i, function(j){
+			addAnd(D, j, semtypes)
+		}))))
 	}
 	
 	# regular expressions
@@ -86,5 +88,11 @@ addAnd <- function(D, i){
 	
 	# NOT: -> neg
 	i_neg <- D[linkTo(D, i_and, 'neg')]$head
-	union(i, setdiff(i_and, i_neg))
+	
+	i_and <- union(i, setdiff(i_and, i_neg))
+	if (is.null(semtypes)){
+		return(i_and)
+	} else {
+		return(intersect(i_and, which(D$semType %in% semtypes)))
+	}
 }
