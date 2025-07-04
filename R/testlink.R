@@ -112,6 +112,8 @@ testlink <- function(linkFunction = c('addAnd',
 		(identical(out, '') & identical(expected, character(0)))){
 		'TRUE'
 	} else {
+		cat(paste0('\nText: ', text, '\nIndex: ', i,
+			'\nExpected: ', expected, '\nActual: ', out, '\n'))
 		setattr(out, 'details', D)
 		out
 	}

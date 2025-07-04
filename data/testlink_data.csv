@@ -4,7 +4,7 @@ addAnd,arm and leg,B B,3,3,"1 arm, 3 leg"
 addAnd,he hurt his arm and leg, F B B,4,4,"4 arm, 6 leg"
 addAnd,he hurt his arm and leg, F B B,6,6,"4 arm, 6 leg"
 addAnd,"arm, leg and hand",B B B,5,5,"1 arm, 3 leg, 5 hand"
-addAnd,"arm, leg and hand",B B B,3,3,"1 arm, 3 leg, 5 hand"
+addAnd,"arm, leg and hand",B B B,1,1,"1 arm, 3 leg, 5 hand"
 addAnd,left or right,L L,1,1,1 left
 addAnd,left or right,L L,3,3,3 right
 addAnd,"arm, leg or hand",B B B,1,1,1 arm

@@ -70,7 +70,7 @@ addLateralityBodyLinks <- function(D, CDB, SNOMED){
 		if (C[i]$semType %in% c('finding', 'disorder', 'morphologic abnormality')){
 			attr_rows <- find_C_rows(findBody(D, C[i]$startword:C[i]$endword))
 			if (length(attr_rows) > 0){
-				# Add and 
+				# Add additional body sites linked by 'and'
 				d_pos <- C[attr_rows, list(d_pos = startword:endword),
 					by = .I]$d_pos
 				attr_rows <- find_C_rows(addAnd(D, d_pos,
