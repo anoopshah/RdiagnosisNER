@@ -4,13 +4,16 @@
 \alias{addAnd}
 \title{Link concepts by 'and'}
 \usage{
-addAnd(D, i)
+addAnd(D, i, semtypes = NULL)
 }
 \arguments{
 \item{D}{spacy parse table containing columns: token, lemma, dep_rel,
 head, semType. Can be created by the 'showparse' function}
 
 \item{i}{= vector of indices of base word(s)}
+
+\item{semtypes}{= character vector of valid semantic types to return,
+of NULL to return any semantic types}
 }
 \value{
 integer vector of indices of linked words, or a zero length
@@ -18,9 +21,7 @@ integer vector of indices of linked words, or a zero length
 }
 \description{
 Finds concepts semantically related to the index concept using the
-conjunction 'and'. This function does not limit the output to
-concepts of a particular semantic type, which might have to be 
-filtered afterwards.
+conjunction 'and'.
 }
 \examples{
 D <- showparse("fracture of left femur and right humerus")

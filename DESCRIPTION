@@ -16,7 +16,7 @@ Description: Functions for carrying out named entity recognition and
     visit <https://www.snomed.org/>.
 License: GPL-3
 Imports: data.table (>= 1.12.8), bit64,
-    Rdiagnosislist (>= 1.4), spacyr
+    Rdiagnosislist (>= 1.5.1), spacyr
 Suggests: knitr, rmarkdown, testthat
 Encoding: UTF-8
 LazyData: true

@@ -8,7 +8,7 @@
 #' Applies the 'spacy parse' function to a phrase.
 #' 
 #' @param x text to process with spacy parse
-#' @param min_len_normalize tokenswith fewer than this number of
+#' @param min_len_normalize tokens with fewer than this number of
 #'   characters will not be lemmatised
 #' @return data.table with columns token, lemma, dep_rel
 #'   (dependency relation) and head (index number of token that the
@@ -24,7 +24,7 @@
 #' @examples
 #' D <- showparse("fracture of left femur and right humerus")
 #' D
-showparse <- function(x, min_len_normalize = 5){
+showparse <- function(x, min_len_normalize = 3){
 	
 	# Declare column names for CRAN check
 	token <- lemma <- dep_rel <- head_token_id <- NULL
@@ -49,7 +49,7 @@ showparse <- function(x, min_len_normalize = 5){
 #' @param CDB concept database environment
 #' @param tablenames which data tables to add lemmatized terms
 #' @param min_len_normalize tokens with fewer than this number of
-#'   characters will not be lemmatised
+#'   characters will not be lemmatised (default 3)
 #' @return CDB environment with an additional 'LEMMA' table. If it
 #'   already exists it will be over-written
 #' @importFrom spacyr spacy_parse
@@ -64,10 +64,13 @@ showparse <- function(x, min_len_normalize = 5){
 #' # CDB <- addLemmaToCDB(CDB)
 addLemmaToCDB <- function(CDB, tablenames = c('FINDINGS', 
 	'QUAL', 'BODY', 'LATERALITY', 'SEVERITY', 'CAUSES', 'MORPH'),
-	min_len_normalize = 5){
+	min_len_normalize = 3){
 		
 	# Declare column names for CRAN check
 	lemma <- term <- conceptId <- NULL
+	
+	# Initialise spacy
+	test <- spacyr::spacy_parse('test')
 	
 	LEMMA <- data.table(term = character(0), 
 		conceptId = SNOMEDconcept(character(0)))
@@ -77,11 +80,17 @@ addLemmaToCDB <- function(CDB, tablenames = c('FINDINGS',
 		LEMMA <- rbind(LEMMA, TABLE)
 	}
 	LEMMA <- LEMMA[!duplicated(LEMMA)]
-	LEMMA[, lemma := ifelse(term == tolower(term) &
-		nchar(term) > min_len_normalize,
-		paste0(' ', paste(spacyr::spacy_parse(sub('^ +| +$', '',
-		term))$lemma, collapse = ' '), ' '), term),
-		by = list(conceptId, term)]
+	LEMMA[, todo :=  term == tolower(term) &
+		nchar(term) > min_len_normalize]
+	message(paste0('Lemmatizing ', sum(LEMMA$todo), ' terms.'))
+	LEMMA[, lemma := term]
+	todo <- which(LEMMA$todo)
+	THELEMMAS <- as.data.table(spacyr::spacy_parse(sub('^ +| +$', '',
+		LEMMA[todo]$term)))
+	LEMMA[todo, lemma := THELEMMAS[,
+		list(thelemma = paste(c('', lemma, ''),
+		collapse = ' ')), by = doc_id]$thelemma]
+	LEMMA[, todo := NULL]
 	data.table::setkeyv(LEMMA, 'lemma')
 	data.table::setindexv(LEMMA, 'term')
 	CDB$LEMMA <- LEMMA
@@ -94,8 +103,8 @@ addLemmaToCDB <- function(CDB, tablenames = c('FINDINGS',
 #' function. If there are multiple concepts with the same term,
 #' this function may return multiple matches.
 #' 
-#' @param text text phrase to match
-#' @param lemma lemma to match
+#' @param text text phrase to match, as a character vector of words
+#' @param lemma lemma to match, as a character vector of words
 #' @param CDB concept database environment
 #' @param SNOMED SNOMED CT dictionary environment
 #' @return unique SNOMEDconcept vector of matches
@@ -108,9 +117,13 @@ findConceptMatch <- function(text, lemma = text, CDB, SNOMED){
 	
 	term <- conceptId <- NULL
 
-	thelemma <- paste0(' ', paste(lemma, collapse = ' '), ' ')
-	theterm <- c(paste0(' ', paste(text, collapse = ' '), ' '),
-		paste0(' ', paste(tolower(text), collapse = ' '), ' '))
+	# apostrophe s at the end of a word is ignored 
+	thelemma <- paste0(' ', paste(lemma[lemma != "'s"],
+		collapse = ' '), ' ')
+	theterm <- c(paste0(' ', paste(text[text != "'s"],
+		collapse = ' '), ' '),
+		paste0(' ', paste(tolower(text[text != "'s"]),
+		collapse = ' '), ' '))
 	
 	# Return a vector of matched concepts
 	union(CDB$LEMMA[term %in% theterm]$conceptId,

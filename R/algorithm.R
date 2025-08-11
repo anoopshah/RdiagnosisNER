@@ -141,11 +141,13 @@ addAttributeLinks <- function(D, CDB, SNOMED){
 			attr_rows <- find_C_rows(c(
 				findAttr(D, C[i]$startword:C[i]$endword),
 				findCause(D, C[i]$startword:C[i]$endword)))
-			d_pos <- C[attr_rows, list(d_pos = startword:endword),
-				by = .I]$d_pos
-			attr_rows <- find_C_rows(addAnd(D, d_pos,
-				semtypes = c('finding', 'disorder', 'organism',
-				'substance', 'event', 'procedure', 'qualifier')))
+			if (length(attr_rows) > 0){
+				d_pos <- C[attr_rows, list(d_pos = startword:endword),
+					by = .I]$d_pos
+				attr_rows <- find_C_rows(addAnd(D, d_pos,
+					semtypes = c('finding', 'disorder', 'organism',
+					'substance', 'event', 'procedure', 'qualifier')))
+			}
 			if (length(attr_rows) > 0){
 				C[attr_rows, link_to := i]
 				C <- addToAttributes(C, i, attr_rows)
@@ -155,7 +157,7 @@ addAttributeLinks <- function(D, CDB, SNOMED){
 	
 	# Allergy / intolerance / adverse rection: link to substance
 	for (i in 1:nrow(C)){
-		if (C[i]$conceptId %in% CDB$allergyConcepts){
+		if (C[i]$conceptId %in% CDB$SCT_allergy){
 			attr_rows <- find_C_rows(
 				findAllergy(D, C[i]$startword:C[i]$endword))
 			if (length(attr_rows) > 0){
@@ -299,7 +301,7 @@ removeAncestorsD <- function(D, CDB, SNOMED){
 			C[semType %in% root_types]$conceptId))
 		matchIds <- remove_ancestors(matchIds, CDB = CDB, 
 			SNOMED = SNOMED)
-		C[semType %in% root_types][!(conceptId %in% matchIds),
+		C[semType %in% root_types & !(conceptId %in% matchIds),
 			semType := paste0('excl_a_', semType)]
 		setattr(D, 'annotations', C)
 	}
@@ -419,8 +421,10 @@ refineFindings <- function(D, CDB, SNOMED){
 			C[i, conceptId := refined_conceptId[1]]
 			C[i, startword := startwhole]
 			C[i, endword := endwhole]
-			D[C[i]$startwhole:C[i]$endwhole, semType :=
-				CDB$SEMTYPE[conceptId == C[i]$conceptId]$semType]
+			C[i, semType := CDB$SEMTYPE[
+				conceptId == C[i]$conceptId]$semType]
+			C[i, term := description(conceptId, SNOMED = SNOMED)$term]
+			D[C[i]$startwhole:C[i]$endwhole, semType := C[i]$semType]
 		}
 		C[i, term := description(conceptId, SNOMED = SNOMED)$term]
 		if (length(refined_conceptId) > 1) {

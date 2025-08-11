@@ -181,7 +181,7 @@ NERsentence <- function(text, CDB, SNOMED, noisy = TRUE,
 		print(showannotations(D))
 		cat('\nRemove multiple or blacklisted single word findings:\n')
 	}
-	
+
 	# Remove multiple or blacklisted single word findings
 	D <- removeAmbiguousSingleWordFindingsD(D, unigram_blacklist)
 	
