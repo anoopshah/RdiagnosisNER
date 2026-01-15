@@ -39,48 +39,48 @@ addAnd <- function(D, i, semtypes = NULL){
 	# regular expressions
 	i_and <- i
 	prep <- c('his', 'her', 'its', 'their', 'the', 'a', 'one')
-	if (min(i) >= 4){ # xxx and his xxx
+	if (min(i) >= 4){ # yyy and his xxx
 		if (tolower(D$lemma[min(i) - 2]) == 'and' &
 			tolower(D$lemma[min(i) - 1]) %in% prep){
 			i_and <- union(i_and, min(i) - 3)
 		}
 	}
-	if (min(i) >= 3){ # xxx and xxx
+	if (min(i) >= 3){ # yyy and xxx
 		if (tolower(D$lemma[min(i) - 1]) == 'and'){
 			i_and <- union(i_and, min(i) - 2)
 		}
 	}
-	if (min(i) >= 5){ # xxx , xxx and xxx
+	if (min(i) >= 5){ # yyy , yyy and xxx
 		if (D$lemma[min(i) - 3] == ',' &
 			tolower(D$lemma[min(i) - 1]) == 'and'){
 			i_and <- union(i_and, min(i) - c(2, 4))
 		}
 	}
-	if (min(i) >= 6){ # xxx , xxx xxx and xxx
+	if (min(i) >= 6){ # yyy , yyy yyy and xxx
 		if (D$lemma[min(i) - 4] == ',' &
 			tolower(D$lemma[min(i) - 1]) == 'and'){
 			i_and <- union(i_and, min(i) - c(2, 3, 5))
 		}
 	}
 	
-	if (max(i) <= nrow(D) - 3){ # xxx and his xxx
+	if (max(i) <= nrow(D) - 3){ # xxx and his yyy
 		if (tolower(D$lemma[max(i) + 1]) == 'and' &
 			tolower(D$lemma[max(i) + 2]) %in% prep){
 			i_and <- union(i_and, max(i) + 3)
 		}
 	}
-	if (max(i) <= nrow(D) - 2){ # xxx and xxx
+	if (max(i) <= nrow(D) - 2){ # xxx and yyy
 		if (tolower(D$lemma[max(i) + 1]) == 'and'){
 			i_and <- union(i_and, max(i) + 2)
 		}
 	}
-	if (max(i) <= nrow(D) - 4){ # xxx , xxx and xxx
+	if (max(i) <= nrow(D) - 4){ # xxx , yyy and yyy
 		if (D$lemma[max(i) + 1] == ',' &
 			tolower(D$lemma[max(i) + 3]) == 'and'){
 			i_and <- union(i_and, max(i) + c(2, 4))
 		}
 	}
-	if (max(i) <= nrow(D) - 5){ # xxx , xxx xxx and xxx
+	if (max(i) <= nrow(D) - 5){ # xxx , yyy yyy and yyy
 		if (D$lemma[max(i) + 1] == ',' &
 			tolower(D$lemma[max(i) + 4]) == 'and'){
 			i_and <- union(i_and, max(i) + c(2, 3, 5))
