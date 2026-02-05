@@ -10,9 +10,9 @@
 #' @param x text to process with spacy parse
 #' @param min_len_normalize tokens with fewer than this number of
 #'   characters will not be lemmatised
-#' @return data.table with columns token, lemma, dep_rel
-#'   (dependency relation) and head (index number of token that the
-#'   dependency relates to)
+#' @return data.table with columns idx (position of token in text),
+#'   token, lemma, dep_rel (dependency relation) and
+#'   head (index number of token that the dependency relates to)
 #' @import data.table
 #' @import bit64
 #' @import spacyr
@@ -31,8 +31,9 @@ showparse <- function(x, min_len_normalize = 3){
 	
 	OUT <- as.data.table(spacyr::spacy_parse(x, entity = TRUE,
 		remove_punct = TRUE, dependency = TRUE, lemma = TRUE,
-		pos = TRUE, output = 'data.frame'))[,
-		list(token, lemma, dep_rel, head_token_id)]
+		pos = TRUE, output = 'data.frame',
+        additional_attributes = 'idx'))[,
+		list(idx, token, lemma, dep_rel, head_token_id)]
 	OUT[nchar(token) < min_len_normalize, lemma := token]
 	OUT[, lemma := tolower(lemma)]
 	OUT

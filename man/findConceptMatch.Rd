@@ -7,9 +7,9 @@
 findConceptMatch(text, lemma = text, CDB, SNOMED)
 }
 \arguments{
-\item{text}{text phrase to match}
+\item{text}{text phrase to match, as a character vector of words}
 
-\item{lemma}{lemma to match}
+\item{lemma}{lemma to match, as a character vector of words}
 
 \item{CDB}{concept database environment}
 

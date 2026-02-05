@@ -7,7 +7,7 @@
 addLemmaToCDB(
   CDB,
   tablenames = c("FINDINGS", "QUAL", "BODY", "LATERALITY", "SEVERITY", "CAUSES", "MORPH"),
-  min_len_normalize = 5
+  min_len_normalize = 3
 )
 }
 \arguments{
@@ -16,7 +16,7 @@ addLemmaToCDB(
 \item{tablenames}{which data tables to add lemmatized terms}
 
 \item{min_len_normalize}{tokens with fewer than this number of
-characters will not be lemmatised}
+characters will not be lemmatised (default 3)}
 }
 \value{
 CDB environment with an additional 'LEMMA' table. If it

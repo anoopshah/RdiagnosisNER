@@ -301,7 +301,7 @@ removeAncestorsD <- function(D, CDB, SNOMED){
 			C[semType %in% root_types]$conceptId))
 		matchIds <- remove_ancestors(matchIds, CDB = CDB, 
 			SNOMED = SNOMED)
-		C[semType %in% root_types & !(conceptId %in% matchIds),
+		C[semType %in% root_types][!(conceptId %in% matchIds),
 			semType := paste0('excl_a_', semType)]
 		setattr(D, 'annotations', C)
 	}

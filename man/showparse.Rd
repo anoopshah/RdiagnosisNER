@@ -4,18 +4,18 @@
 \alias{showparse}
 \title{Parse a phrase using spacy parse}
 \usage{
-showparse(x, min_len_normalize = 5)
+showparse(x, min_len_normalize = 3)
 }
 \arguments{
 \item{x}{text to process with spacy parse}
 
-\item{min_len_normalize}{tokenswith fewer than this number of
+\item{min_len_normalize}{tokens with fewer than this number of
 characters will not be lemmatised}
 }
 \value{
-data.table with columns token, lemma, dep_rel
-  (dependency relation) and head (index number of token that the
-  dependency relates to)
+data.table with columns idx (position of token in text),
+  token, lemma, dep_rel (dependency relation) and
+  head (index number of token that the dependency relates to)
 }
 \description{
 Applies the 'spacy parse' function to a phrase.
